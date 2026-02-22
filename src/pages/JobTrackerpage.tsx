@@ -8,8 +8,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { trackerData } from "@/data/sampleData";
+
 import AppLayout from "@/components/layout/AppLayout";
+import { useUserJobApplications } from "@/hooks/useUserjobapplications";
+import { Link } from "react-router-dom";
 
 const statusConfig = {
   saved: {
@@ -53,25 +55,51 @@ const cardVariants = {
 
 const JobTrackerPage = () => {
   const [activeTab, setActiveTab] = useState("all");
+  const { data: jobs = [], isLoading, isError } = useUserJobApplications();
+  if (isLoading) {
+  return (
+    <AppLayout>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+      </div>
+    </AppLayout>
+  );
+}
+if (isError) {
+  return (
+    <AppLayout>
+      <div className="p-6 text-center text-destructive">
+        Failed to load job tracker
+      </div>
+    </AppLayout>
+  );
+}
 
-  const filtered = activeTab === "all" ? trackerData : trackerData.filter((j) => j.status === activeTab);
+
+  
+
+const filtered =
+  activeTab === "all"
+    ? jobs
+    : jobs.filter((j) => j.status === activeTab);
 
   const counts = {
-    all: trackerData.length,
-    saved: trackerData.filter((j) => j.status === "saved").length,
-    applied: trackerData.filter((j) => j.status === "applied").length,
-    ignored: trackerData.filter((j) => j.status === "ignored").length,
-  };
+  all: jobs.length,
+  saved: jobs.filter((j) => j.status === "saved").length,
+  applied: jobs.filter((j) => j.status === "applied").length,
+  ignored: jobs.filter((j) => j.status === "ignored").length,
+};
 
   const summaryStats = [
-    { label: "Total Tracked", value: trackerData.length, icon: LayoutDashboard, color: "text-primary" },
-    { label: "Applied", value: counts.applied, icon: CheckCircle, color: "text-accent" },
-    { label: "Saved", value: counts.saved, icon: Bookmark, color: "text-primary" },
-    { label: "Ignored", value: counts.ignored, icon: XCircle, color: "text-muted-foreground" },
+    { label: "Total Tracked", value: jobs.length, icon: LayoutDashboard, color: "text-primary" },
+    { label: "Applied", value: counts.applied ||"-", icon: CheckCircle, color: "text-accent" },
+    { label: "Saved", value: counts.saved ||"-", icon: Bookmark, color: "text-primary" },
+    { label: "Ignored", value: counts.ignored ||"-", icon: XCircle, color: "text-muted-foreground" },
   ];
 
   return (
     <AppLayout>
+    
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         {/* Page header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
@@ -193,12 +221,26 @@ const JobTrackerPage = () => {
                 })}
               </AnimatePresence>
 
-              {filtered.length === 0 && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
-                  <XCircle className="h-10 w-10 text-muted-foreground mx-auto mb-3 opacity-40" />
-                  <p className="text-muted-foreground text-sm">No {activeTab} jobs yet</p>
-                </motion.div>
-              )}
+              {jobs.length === 0 && (
+  <motion.div
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="flex flex-col items-center justify-center py-20 text-center"
+  >
+    <LayoutDashboard className="h-12 w-12 text-muted-foreground opacity-40 mb-4" />
+    <h3 className="text-lg font-semibold text-foreground mb-1">
+      No jobs tracked yet
+    </h3>
+    <p className="text-sm text-muted-foreground max-w-sm mb-4">
+      Start tracking jobs you’re interested in to manage applications and follow-ups easily.
+    </p>
+    <Link to="/jobs">
+    <Button variant="hero" size="sm">
+      Add your first job
+    </Button>
+    </Link>
+  </motion.div>
+)}
             </TabsContent>
           ))}
         </Tabs>
