@@ -50,6 +50,7 @@
     --sidebar-ring: 172 66% 50%;
   }
 }
+/* Lovable-style outline card for dark backgrounds */
 
 @layer base {
   * {

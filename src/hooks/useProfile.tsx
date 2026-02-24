@@ -12,14 +12,17 @@ async function fetchProfile() {
   }
 
 
-   const{profile}=await res.json()
-      return {
-        ...profile,
-        skills: profile.skills ?? [],
-        location: profile.location ?? "",
-        experience: profile.experience ?? 0,
-        bio: profile.bio ?? "",
-      };
+   const data = await res.json();
+     console.log("data::",data)
+  return {
+    ...data.profile,
+    resume: data.resume,
+    applicationsCount: data.applicationsCount,
+    skills: data.profile.skills ?? [],
+    location: data.profile.location ?? "",
+    experience: data.profile.experience ?? 0,
+    bio: data.profile.bio ?? "",
+  };
 }
 
 export function useProfile() {
@@ -27,6 +30,6 @@ export function useProfile() {
     queryKey: ["profile"],
     queryFn: fetchProfile,
     retry:3,
-    staleTime: 5 * 60 * 1000, // cache profile for 5 mins
+    // staleTime: 5 * 60 * 1000, // cache profile for 5 mins
   });
 }

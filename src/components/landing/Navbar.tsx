@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   return (
@@ -20,10 +21,11 @@ const Navbar = () => {
           <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
           <a href="#faq" className="hover:text-foreground transition-colors">FAQ</a>
         </div>
-
+        <Link to ="/login">
         <Button variant="hero" size="sm">
           Get Started
         </Button>
+        </Link>
       </div>
     </motion.nav>
   );

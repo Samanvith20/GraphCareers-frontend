@@ -3,8 +3,24 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import heroBg from "@/assets/hero-bg.jpg";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
+
+ 
 const Hero = () => {
+  const navigate = useNavigate();
+  const { data: user, isLoading } = useAuth();
+
+  const handleGetStarted = () => {
+    if (isLoading) return; // optional guard
+
+    if (user) {
+      navigate("/jobs"); // or /profile
+    } else {
+      navigate("/login"); // or /signup
+    }
+  };
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0">
@@ -52,13 +68,17 @@ const Hero = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
         >
-          <Button variant="hero" size="lg" className="group">
+          <Link to ="/login">
+          <Button variant="hero" size="lg"  className="group">
             Get Started Free
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Button>
-          <Button variant="heroOutline" size="lg">
-            See How It Works
-          </Button>
+          </Link>
+          <a href="#how-it-works">
+            <Button variant="heroOutline" size="lg">
+              See How It Works
+            </Button>
+          </a>
         </motion.div>
       </div>
     </section>

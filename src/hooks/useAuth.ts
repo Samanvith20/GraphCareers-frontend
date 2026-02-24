@@ -12,7 +12,7 @@ export function useAuth() {
       });
 
       if (!res.ok) {
-        throw new Error("Not authenticated");
+        return null; // 👈 important
       }
 
       return res.json();

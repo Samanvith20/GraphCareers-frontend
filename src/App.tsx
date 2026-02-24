@@ -11,6 +11,10 @@ import LoginPage from "./pages/loginpage";
 import SignupPage from "./pages/signuppage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { PublicRoute } from "./components/publicRoute";
+import ForgotPasswordPage from "./pages/forgotPasswordpage";
+import CareerProgressionPage from "./pages/careerProgression";
+import ChatPage from "./pages/ChatPage";
+
 
 const queryClient = new QueryClient();
 
@@ -27,6 +31,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <JobsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/chat"
+            element={
+              <ProtectedRoute>
+                <ChatPage />
               </ProtectedRoute>
             }
           />
@@ -49,6 +61,14 @@ const App = () => (
             }
           />
           <Route
+            path="/career"
+            element={
+              <ProtectedRoute>
+                <CareerProgressionPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/login"
             element={
               <PublicRoute>
@@ -67,7 +87,11 @@ const App = () => (
           />
           <Route
             path="/forgot"
-            element={<div>Forgot Password Page (TODO)</div>}
+             element={
+              <PublicRoute>
+                <ForgotPasswordPage />
+              </PublicRoute>
+            }
           />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

@@ -1,14 +1,16 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Zap, LayoutDashboard, Briefcase, User, Home, Menu, X } from "lucide-react";
+import { Zap, LayoutDashboard, Briefcase, User, Home, Menu, X, TrendingUp, MessageSquare } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { userData } from "@/data/sampleData";
 
 const navItems = [
-  { label: "Jobs", href: "/jobs", icon: Zap },
+ { label: "Jobs", href: "/jobs", icon: Zap },
   { label: "Tracker", href: "/tracker", icon: LayoutDashboard },
+  { label: "Career", href: "/career", icon: TrendingUp },
+  { label: "Chat", href: "/chat", icon: MessageSquare },
   { label: "Profile", href: "/profile", icon: User },
 ];
 
@@ -28,9 +30,9 @@ const AppLayout = ({ children }) => {
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 text-sm font-bold tracking-tight">
-            <span className="text-primary">Graph</span>Careers
-          </Link>
+         <Link to="/" className="text-lg font-bold tracking-tight text-foreground">
+          <span className="text-primary">Graph</span>Careers
+        </Link>
 
           {/* Desktop nav */}
           <nav className="hidden sm:flex items-center gap-1">

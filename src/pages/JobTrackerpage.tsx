@@ -12,6 +12,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import AppLayout from "@/components/layout/AppLayout";
 import { useUserJobApplications } from "@/hooks/useUserjobapplications";
 import { Link } from "react-router-dom";
+import ErrorPage from "./ErrorPage";
 
 const statusConfig = {
   saved: {
@@ -65,12 +66,10 @@ const JobTrackerPage = () => {
     </AppLayout>
   );
 }
-if (isError) {
+if (isError || !jobs) {
   return (
     <AppLayout>
-      <div className="p-6 text-center text-destructive">
-        Failed to load job tracker
-      </div>
+     <ErrorPage />
     </AppLayout>
   );
 }

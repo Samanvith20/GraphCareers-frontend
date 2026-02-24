@@ -35,91 +35,23 @@ import { useUploadResume } from "@/hooks/useUploadResume";
 import { toast } from "sonner";
 import { logoutUser } from "@/lib/logout";
 import { normalizeSkill } from "@/lib/utils";
-
-const skillCategories = [
-  {
-    label: "Frontend",
-    color: "text-primary",
-    bg: "bg-primary/10 text-primary border-primary/20",
-    skills: [
-      "javascript",
-      "typescript",
-      "react.js",
-      "next.js",
-      "redux",
-      "tailwind css",
-      "html5",
-      "css3",
-    ],
-  },
-  {
-    label: "Backend",
-    color: "text-accent",
-    bg: "bg-accent/10 text-accent border-accent/20",
-    skills: [
-      "node.js",
-      "express.js",
-      "rest apis",
-      "graphql",
-      "prisma",
-      "drizzle orm",
-      "jwt",
-      "oauth 2.0",
-    ],
-  },
-  {
-    label: "Databases",
-    color: "text-primary",
-    bg: "bg-secondary text-secondary-foreground border-border",
-    skills: ["postgresql", "mongodb", "neo4j", "redis", "bullmq", "rabbitmq"],
-  },
-  {
-    label: "DevOps & Cloud",
-    color: "text-accent",
-    bg: "bg-accent/10 text-accent border-accent/20",
-    skills: [
-      "docker",
-      "github actions",
-      "aws",
-      "linux",
-      "shell scripting",
-      "terraform",
-      "ansible",
-    ],
-  },
-  {
-    label: "AI & Scraping",
-    color: "text-primary",
-    bg: "bg-primary/10 text-primary border-primary/20",
-    skills: [
-      "playwright",
-      "cheerio",
-      "puppeteer",
-      "proxy management",
-      "rag pipelines",
-      "vector databases",
-      "llm apis",
-      "prompt engineering",
-      "openai",
-      "anthropic",
-    ],
-  },
-];
+import { useQueryClient } from "@tanstack/react-query";
+import ErrorPage from "./ErrorPage";
 
 const ProfilePage = () => {
   // All hooks must be called at the top of the component
   const { data: userData, isLoading, isError } = useProfile();
   const updateProfile = useUpdateProfile();
   const uploadResume = useUploadResume();
-type ResumeStatus =
-  | "idle"
-  | "uploading"
-  | "extracting"
-  | "parsing"
-  | "completed"
-  | "error";
+  type ResumeStatus =
+    | "idle"
+    | "uploading"
+    | "extracting"
+    | "parsing"
+    | "completed"
+    | "error";
 
-   const [resumeStatus, setResumeStatus] = useState<ResumeStatus>("idle");
+  const [resumeStatus, setResumeStatus] = useState<ResumeStatus>("idle");
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
     name: userData?.name || "",
@@ -132,8 +64,10 @@ type ResumeStatus =
 
   const [newSkill, setNewSkill] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
-  const [extracting, setExtracting] = useState(false);
-  const [extracted, setExtracted] = useState(false);
+
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+  const queryClient = useQueryClient();
+
   useEffect(() => {
     if (!userData) return;
     setForm({
@@ -157,14 +91,11 @@ type ResumeStatus =
       </AppLayout>
     );
   }
-  
 
   if (isError || !userData) {
     return (
       <AppLayout>
-        <div className="p-6 text-center text-destructive">
-          Failed to load profile
-        </div>
+        <ErrorPage />
       </AppLayout>
     );
   }
@@ -177,7 +108,11 @@ type ResumeStatus =
         : "Not added",
       icon: Briefcase,
     },
-    { label: "Applications", value: 0, icon: Globe },
+    {
+      label: "Applications",
+      value: userData.applicationsCount ?? 0,
+      icon: Globe,
+    },
   ];
 
   const basicInfoFields = [
@@ -187,66 +122,76 @@ type ResumeStatus =
     userData?.role,
   ];
 
-  const handleSave = () => {
-    const updatedFields = {};
-    Object.keys(form).forEach((key) => {
-      if (
-        form[key] !== userData[key] &&
-        (Array.isArray(form[key]) ? form[key].length > 0 : form[key] !== "")
-      ) {
-        updatedFields[key] = form[key];
-      }
-    });
-    if (Object.keys(updatedFields).length > 0) {
-      updateProfile.mutate(updatedFields as any, {
-        onSuccess: () => {
-          setEditing(false);
-          toast.success("Profile updated successfully");
-        },
-        onError: () => {
-          toast.error("Failed to update profile");
-        },
-      });
-    } else {
+    const handleSave = () => {
+  const updatedFields: Record<string, any> = {};
+
+  // primitives
+  if (form.name !== userData.name) updatedFields.name = form.name;
+  if (form.bio !== userData.bio) updatedFields.bio = form.bio;
+  if (form.location !== userData.location)
+    updatedFields.location = form.location;
+  if (form.experience !== userData.experience)
+    updatedFields.experience = form.experience;
+  if (form.role !== userData.role) updatedFields.role = form.role;
+
+  // ✅ skills: REPLACE semantics
+  if (
+    JSON.stringify(form.skills) !== JSON.stringify(userData.skills)
+  ) {
+    updatedFields.skills = form.skills; // can be []
+  }
+
+  if (Object.keys(updatedFields).length === 0) {
+    setEditing(false);
+    return;
+  }
+
+  updateProfile.mutate(updatedFields, {
+    onSuccess: () => {
       setEditing(false);
+      toast.success("Profile updated successfully");
+    },
+    onError: () => {
+      toast.error("Failed to update profile");
+    },
+  });
+};
+  const isBusy =
+    resumeStatus === "uploading" ||
+    resumeStatus === "extracting" ||
+    resumeStatus === "parsing";
+  const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setResumeFile(file);
+    setResumeStatus("uploading");
+
+    try {
+      // Step 1: Upload + text extraction
+      await uploadResume.mutateAsync(file);
+      setResumeStatus("extracting");
+
+      // Step 2: AI parsing
+      setResumeStatus("parsing");
+      const res = await fetch(`${BASE_URL}/api/user/resume-parse`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || data.message || "AI parsing failed");
+      }
+      await queryClient.invalidateQueries({ queryKey: ["profile"] });
+      setResumeStatus("completed");
+      toast.success("Resume processed and profile updated 🎉");
+    } catch (err: any) {
+      console.error(err);
+      setResumeStatus("idle");
+      toast.error(err.message || "Resume processing failed");
     }
   };
-  const isBusy =
-  resumeStatus === "uploading" ||
-  resumeStatus === "extracting" ||
-  resumeStatus === "parsing";
-const handleResumeUpload = async (
-  e: React.ChangeEvent<HTMLInputElement>
-) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
-
-  setResumeFile(file);
-  setResumeStatus("uploading");
-
-  try {
-    // Step 1: Upload + text extraction
-    await uploadResume.mutateAsync(file);
-    setResumeStatus("extracting");
-
-    // Step 2: AI parsing
-    setResumeStatus("parsing");
-    const res = await fetch("/api/user/resume-parse", {
-      method: "POST",
-    });
-
-    if (!res.ok) {
-      throw new Error("AI parsing failed");
-    }
-
-    setResumeStatus("completed");
-    toast.success("Resume processed and profile updated 🎉");
-  } catch (err: any) {
-    console.error(err);
-    setResumeStatus("idle");
-    toast.error(err.message || "Resume processing failed");
-  }
-};
   const filledBasicInfo = basicInfoFields.filter(Boolean).length;
   const totalBasicInfo = basicInfoFields.length;
 
@@ -260,10 +205,7 @@ const handleResumeUpload = async (
     bio: userData.bio.length >= 50 ? 100 : 0,
   };
 
-  const totalCompletion = Object.values(profileCompletion).reduce(
-    (sum, v) => sum + v,
-    0,
-  );
+ 
   const profileStrengthItems = [
     { label: "Basic Info", pct: profileCompletion.basicInfo },
     { label: "Experience Added", pct: profileCompletion.experience },
@@ -340,7 +282,8 @@ const handleResumeUpload = async (
           initial="hidden"
           animate="visible"
         >
-          <Card className="overflow-hidden">
+            <Card className="border border-white/20">
+        
             <div className="h-28 bg-gradient-to-r from-primary/20 via-accent/10 to-primary/5 relative">
               <div className="absolute inset-0 bg-grid opacity-20" />
             </div>
@@ -421,7 +364,8 @@ const handleResumeUpload = async (
                       onClick={handleSave}
                       disabled={isBusy}
                     >
-                      <Check className="h-3.5 w-3.5" />  {isBusy ? "Please wait…" : "Save"}
+                      <Check className="h-3.5 w-3.5" />{" "}
+                      {isBusy ? "Please wait…" : "Save"}
                     </Button>
                   </div>
                 ) : (
@@ -508,7 +452,8 @@ const handleResumeUpload = async (
               initial="hidden"
               animate="visible"
             >
-              <Card>
+            <Card className="border border-white/20">
+           
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                     Overview
@@ -539,82 +484,131 @@ const handleResumeUpload = async (
               initial="hidden"
               animate="visible"
             >
-              <Card>
+            <Card className="border border-white/20">
+            
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                     Resume
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <p className="text-xs text-muted-foreground">
-                    Upload your resume and we'll extract your details
-                    automatically.
-                  </p>
+                  {!userData.resume.parsed && (
+                    <p className="text-xs text-muted-foreground">
+                      Upload your resume and we'll extract your details
+                      automatically.
+                    </p>
+                  )}
 
-                   <label
-  htmlFor="resume-upload"
-  className="flex flex-col items-center gap-2 border-2 border-dashed border-border rounded-lg p-5 cursor-pointer transition-colors"
->
-  {resumeStatus === "uploading" && (
-    <>
-      <Loader2 className="h-8 w-8 text-primary animate-spin" />
-      <p className="text-sm font-medium">Uploading resume…</p>
-      <p className="text-xs text-muted-foreground">
-        Sending file securely
-      </p>
-    </>
-  )}
+                  <label
+                    htmlFor="resume-upload"
+                    className="flex flex-col items-center gap-2 border border-dashed border-white/15
+hover:border-white/30 rounded-lg p-5 cursor-pointer transition-colors"
+                  >
+                    {resumeStatus === "idle" && !userData.resume.parsed && (
+                      <>
+                        <Upload className="h-8 w-8 text-muted-foreground" />
+                        <p className="text-sm font-medium">
+                          Drop your resume here
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          PDF, DOCX · max 500KB
+                        </p>
+                      </>
+                    )}
+                    {resumeStatus === "uploading" && (
+                      <>
+                        <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                        <p className="text-sm font-medium">Uploading resume…</p>
+                        <p className="text-xs text-muted-foreground">
+                          Sending file securely
+                        </p>
+                      </>
+                    )}
 
-  {resumeStatus === "extracting" && (
-    <>
-      <Clock className="h-8 w-8 text-primary" />
-      <p className="text-sm font-medium">Extracting text…</p>
-      <p className="text-xs text-muted-foreground">
-        Reading resume contents
-      </p>
-      <Progress value={40} className="h-1.5 w-full" />
-    </>
-  )}
+                    {resumeStatus === "extracting" && (
+                      <>
+                        <Clock className="h-8 w-8 text-primary" />
+                        <p className="text-sm font-medium">Extracting text…</p>
+                        <p className="text-xs text-muted-foreground">
+                          Reading resume contents
+                        </p>
+                        <Progress value={40} className="h-1.5 w-full" />
+                      </>
+                    )}
 
-  {resumeStatus === "parsing" && (
-    <>
-      <Loader2 className="h-8 w-8 text-primary animate-spin" />
-      <p className="text-sm font-medium">Analyzing resume with AI…</p>
-      <p className="text-xs text-muted-foreground">
-        Skills · Experience · Bio
-      </p>
-      <Progress value={70} className="h-1.5 w-full" />
-    </>
-  )}
+                    {resumeStatus === "parsing" && (
+                      <>
+                        <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                        <p className="text-sm font-medium">
+                          Analyzing resume please wait
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Skills · Experience · Bio
+                        </p>
+                        <Progress value={70} className="h-1.5 w-full" />
+                      </>
+                    )}
 
-  {resumeStatus === "completed" && resumeFile && (
-    <>
-      <FileText className="h-8 w-8 text-primary" />
-      <p className="text-sm font-medium">{resumeFile.name}</p>
-      <p className="text-xs text-primary">✓ Resume processed</p>
-      <Progress value={100} className="h-1.5 w-full" />
-    </>
-  )}
+                    {resumeStatus === "completed" && resumeFile && (
+                      <>
+                        <FileText className="h-8 w-8 text-primary" />
+                        <p className="text-sm font-medium">{resumeFile.name}</p>
+                        <p className="text-xs text-primary">
+                          ✓ Resume processed
+                        </p>
+                        <Progress value={100} className="h-1.5 w-full" />
+                      </>
+                    )}
 
-  {resumeStatus === "idle" && (
-    <>
-      <Upload className="h-8 w-8 text-muted-foreground" />
-      <p className="text-sm font-medium">Drop your resume here</p>
-      <p className="text-xs text-muted-foreground">
-        PDF, DOCX · max 500KB
-      </p>
-    </>
-  )}
+                    {resumeStatus === "idle" && userData.resume.parsed && (
+                      <>
+                        <FileText className="h-8 w-8 text-primary" />
+                        <p className="text-sm font-medium">
+                          {userData.resume.fileName ?? "Resume uploaded"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Uploaded on{" "}
+                          {new Date(
+                            userData.resume.uploadedAt,
+                          ).toLocaleDateString()}
+                        </p>
 
-  <input
-    id="resume-upload"
-    type="file"
-    accept=".pdf,.doc,.docx"
-    className="hidden"
-    onChange={handleResumeUpload}
-    disabled={resumeStatus !== "idle" && resumeStatus !== "completed"}
-  />
-</label>
+                        {userData.resume.parsed && (
+                          <p className="text-xs text-primary">
+                            ✓ Resume processed
+                          </p>
+                        )}
+                         {/* 👇 Important helper text */}
+    <p className="text-xs text-muted-foreground mt-1">
+      Details may not be 100% accurate. Please review and update if needed.
+    </p>
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-2"
+                          onClick={() =>
+                            document.getElementById("resume-upload")?.click()
+                          }
+                        >
+                          Replace Resume
+                        </Button>
+                      </>
+                    )}
+
+                    <input
+                      id="resume-upload"
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      className="hidden"
+                      onChange={handleResumeUpload}
+                      disabled={
+                        resumeStatus === "uploading" ||
+                        resumeStatus === "parsing"
+                      }
+                    />
+                  </label>
+                  
                 </CardContent>
               </Card>
             </motion.div>
@@ -625,7 +619,8 @@ const handleResumeUpload = async (
               initial="hidden"
               animate="visible"
             >
-              <Card>
+            <Card className="border border-white/20">
+          
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                     Profile Strength
@@ -655,7 +650,8 @@ const handleResumeUpload = async (
           {/* Right column */}
           <div className="lg:col-span-2 space-y-6">
             {userData.skills.length === 0 && !userData.bio && (
-              <Card className="border-dashed bg-accent/10">
+            <Card className="border border-white/20">
+           
                 <CardContent className="p-6 text-center flex flex-col items-center">
                   <p className="text-lg text-primary font-semibold mb-2">
                     🚀 Welcome! Let's build your profile
@@ -681,7 +677,8 @@ const handleResumeUpload = async (
               initial="hidden"
               animate="visible"
             >
-              <Card>
+            <Card className="border border-white/20">
+              
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
                     <User className="h-4 w-4 text-primary" />
@@ -712,7 +709,7 @@ const handleResumeUpload = async (
               initial="hidden"
               animate="visible"
             >
-              <Card>
+            <Card className="border border-white/20">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
                     <Star className="h-4 w-4 text-primary" />
@@ -761,7 +758,7 @@ const handleResumeUpload = async (
                       form.skills.map((skill: string, idx) => (
                         <span
                           key={skill + idx}
-                          className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border capitalize bg-primary/10 text-primary border-primary/20 group"
+                          className="inline-flex items-center  gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border capitalize bg-primary/10 text-primary border-primary/20 group"
                         >
                           {skill}
                           {editing && (

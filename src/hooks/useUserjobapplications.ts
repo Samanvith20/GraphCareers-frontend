@@ -1,4 +1,4 @@
-// hooks/useUserJobs.ts
+
 import { useQuery } from "@tanstack/react-query";
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
