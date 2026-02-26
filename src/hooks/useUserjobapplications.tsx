@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 async function fetchUserJobApplications() {
-  const res = await fetch(`${BASE_URL}/api/user/job-applications`, {
+  const res = await fetch(`${BASE_URL}/api/job-applications`, {
     credentials: "include",
   });
 

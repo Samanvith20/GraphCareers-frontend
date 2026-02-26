@@ -6,27 +6,53 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
+
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
-  const { toast } = useToast();
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) {
-      toast({ title: "Email required", description: "Please enter your email address.", variant: "destructive" });
+
+    if (!email.trim()) {
+      toast.error("Please enter your email address");
       return;
     }
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+
+    try {
+      setLoading(true);
+
+      const res = await fetch(`${BASE_URL}/api/auth/forgot-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.success === false) {
+        toast.error(
+          data?.error || "Something went wrong. Please try again."
+        );
+        return;
+      }
+
       setSent(true);
-      toast({ title: "Email sent!", description: "Check your inbox for reset instructions." });
-    }, 1200);
+      toast.success("Password reset link sent! Check your email.");
+
+    } catch (error) {
+      toast.error("Network error. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">

@@ -19,6 +19,7 @@ export function ProtectedRoute({ children }: { children: JSX.Element }) {
   }
 
   if (isError) {
+
     return <Navigate to="/login" replace />;
   }
 

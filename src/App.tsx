@@ -12,8 +12,9 @@ import SignupPage from "./pages/signuppage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { PublicRoute } from "./components/publicRoute";
 import ForgotPasswordPage from "./pages/forgotPasswordpage";
-import CareerProgressionPage from "./pages/careerProgression";
+import CareerProgressionPage from "./pages/CareerProgression";
 import ChatPage from "./pages/ChatPage";
+import ResetPasswordPage from "./pages/Resetpassword";
 
 
 const queryClient = new QueryClient();
@@ -76,7 +77,14 @@ const App = () => (
               </PublicRoute>
             }
           />
-
+ <Route
+            path="/reset-password"
+            element={
+              <PublicRoute>
+                <ResetPasswordPage />
+              </PublicRoute>
+            }
+          />
           <Route
             path="/signup"
             element={

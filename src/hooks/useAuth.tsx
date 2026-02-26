@@ -12,7 +12,7 @@ export function useAuth() {
       });
 
       if (!res.ok) {
-        return null; // 👈 important
+        throw new Error("Failed to fetch user");
       }
 
       return res.json();

@@ -2,8 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
-async function fetchProfile() {
-  const res = await fetch(`${BASE_URL}/api/user`, {
+async function fetchcareerProgression() {
+  const res = await fetch(`${BASE_URL}/api/career`, {
+    method:'POST',
     credentials: "include",
   });
 
@@ -14,22 +15,14 @@ async function fetchProfile() {
 
    const data = await res.json();
  
-  return {
-    ...data.profile,
-    resume: data.resume,
-    applicationsCount: data.applicationsCount,
-    skills: data.profile.skills ?? [],
-    location: data.profile.location ?? "",
-    experience: data.profile.experience ?? 0,
-    bio: data.profile.bio ?? "",
-  };
+  return data;
 }
 
-export function useProfile() {
+export function useCareerProgression() {
   
   return useQuery({
-    queryKey: ["profile"],
-    queryFn: fetchProfile,
+    queryKey: ["career"],
+    queryFn: fetchcareerProgression,
 
     // ✅ caching strategy
     staleTime: 30 * 60 * 1000, // 30 mins

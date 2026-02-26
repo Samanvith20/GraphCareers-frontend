@@ -1,6 +1,7 @@
 
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 export async function logoutUser() {
-  const res = await fetch("/api/auth/logout", {
+  const res = await fetch(`${BASE_URL}/api/auth/logout`, {
     method: "POST",
     credentials: "include",
   });
