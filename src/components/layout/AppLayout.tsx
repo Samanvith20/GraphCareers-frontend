@@ -1,10 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Zap, LayoutDashboard, Briefcase, User, Home, Menu, X, TrendingUp, MessageSquare } from "lucide-react";
+import { Zap, LayoutDashboard, Briefcase, User, Home, Menu, X, TrendingUp, MessageSquare, ChartNoAxesColumnDecreasing } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { userData } from "@/data/sampleData";
+
+import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
  { label: "Jobs", href: "/jobs", icon: Zap },
@@ -15,9 +16,30 @@ const navItems = [
 ];
 
 const AppLayout = ({ children }) => {
+    const [mobileOpen, setMobileOpen] = useState(false);
   const { pathname } = useLocation();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const initials = userData.name.split(" ").map((n) => n[0]).join("").slice(0, 2);
+  const{data,isLoading}=useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+          <p className="text-sm text-muted-foreground">
+            Checking your session…
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+ const initials =
+  data?.user?.name
+    ?.split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() ?? "U";
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

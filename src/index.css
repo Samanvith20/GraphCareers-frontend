@@ -66,6 +66,8 @@
   }
 }
 
+
+
 @layer utilities {
   .text-gradient-primary {
     @apply bg-clip-text text-transparent;

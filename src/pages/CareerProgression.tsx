@@ -1,208 +1,222 @@
 import AppLayout from "@/components/layout/AppLayout";
-import { motion, AnimatePresence } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Briefcase,
-  GraduationCap,
-  Building2,
-  Target,
-  DollarSign,
-  ChevronRight,
-} from "lucide-react";
-
-import { useState, useCallback, useMemo, useEffect } from "react";
-import Tree from "react-d3-tree";
-import ErrorPage from "./ErrorPage";
 import { useCareerProgression } from "@/hooks/useCareerProgression";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import Tree from "react-d3-tree";
+import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useRef, useState, useCallback } from "react";
+import ErrorPage from "./ErrorPage";
 
+/* ───────────────── Types ───────────────── */
+interface CareerRole {
+  role: string;
+  salary: string;
+  companies: string[];
+  matchedSkills: string[];
+  missingSkills: string[];
+}
 
-// Build tree data for react-d3-tree: first role is root, rest are children
-function buildTreeData(roles) {
-  if (!roles.length) return undefined;
+/* ───────────────── Tree Builder ───────────────── */
+function buildTree(roles: CareerRole[]) {
+  if (!roles.length) return null;
 
-  const [root, ...children] = roles;
+  const [root, ...rest] = roles;
 
   return {
     name: root.role,
-    attributes: { salary: root.salary },
-    children: children.map((r) => ({
+    attributes: { isRoot: "true" },
+    children: rest.map((r) => ({
       name: r.role,
-      attributes: { salary: r.salary },
+      attributes: { isRoot: "false" },
+      children: [],
     })),
   };
 }
 
-function renderCustomNode({ nodeDatum, onSelectRole, selectedRole }) {
+/* ───────────────── Custom Node ───────────────── */
+function CustomNode({
+  nodeDatum,
+  selectedRole,
+  onSelect,
+}: any) {
+  const isRoot = nodeDatum.attributes?.isRoot === "true";
   const isSelected = selectedRole === nodeDatum.name;
 
+  const width = isRoot ? 220 : 190;
+  const height = isRoot ? 120 : 100;
+
   return (
-    <foreignObject x={-80} y={-80} width={160} height={160}>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger >
-            <div
-              onClick={() => onSelectRole(nodeDatum.name)}
-              className={`
-                w-40 h-40 rounded-xl border
-                flex flex-col items-center justify-center text-center
-                cursor-pointer select-none
-                transition-all
-                ${
-                  isSelected
-                    ? "bg-primary/10 border-primary"
-                    : "bg-background border-border"
-                }
-              `}
-              style={{ pointerEvents: "auto" }}
-            >
-              <p className="text-sm font-semibold text-foreground px-2 leading-snug">
-                {nodeDatum.name}
-              </p>
+    <foreignObject
+      x={-width / 2}
+      y={-height / 2}
+      width={width}
+      height={height}
+    >
 
-              {nodeDatum.attributes?.salary && (
-                <p className="mt-2 text-xs text-muted-foreground">
-                  {nodeDatum.attributes.salary}
-                </p>
-              )}
-            </div>
-          </TooltipTrigger>
+      <div
+      style={{ pointerEvents: "auto" }}
+  onClick={() => onSelect(nodeDatum.name)}
+  className={`
+    relative h-full w-full cursor-pointer rounded-xl
+    border border-white
+    ${
+      isSelected
+        ? "border-primary bg-primary/10 ring-2 ring-primary/30"
+        : "border-border bg-background/60 hover:border-primary/40"
+    }
+  `}
+>
+  {/* Glow layer (only for selected) */}
+  {isSelected && (
+    <div className="pointer-events-none absolute inset-0 rounded-xl bg-glow-primary" />
+  )}
 
-          <TooltipContent side="top" className="max-w-[220px] text-xs">
-            Suggested role based on your skills and current hiring trends.
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+  <div className="relative flex h-full flex-col justify-center px-4 text-center">
+    {isRoot && (
+      <span className="mx-auto mb-3 w-fit rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-primary">
+        Best Match
+      </span>
+    )}
+
+    <p
+      className={`text-sm font-semibold leading-snug ${
+        isSelected ? "text-primary" : "text-foreground"
+      }`}
+    >
+      {nodeDatum.name}
+    </p>
+  </div>
+</div>
     </foreignObject>
   );
 }
 
-function RoleDetailPanel({ role }) {
-  const matchPercent = Math.round(
-    (role.matchedSkills.length / (role.matchedSkills.length + role.missingSkills.length)) * 100
-  );
-
+/* ───────────────── Detail Panel ───────────────── */
+function DetailPanel({ role }: { role: CareerRole }) {
   return (
     <motion.div
       key={role.role}
-      initial={{ opacity: 0, x: 20 }}
+      initial={{ opacity: 0, x: 16 }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      transition={{ duration: 0.3 }}
-      className="space-y-5"
+      exit={{ opacity: 0, x: -10 }}
+      className="
+        relative h-full overflow-y-auto rounded-2xl
+        border border-border bg-background/60 p-6
+      "
     >
-      {/* Header */}
-      <div className="flex items-start justify-between gap-3">
-        <div>
-<h3 className="text-lg font-semibold">{role.role}</h3>
-         
-        </div>
-        <div className="text-right shrink-0">
-          {/* <span className={`text-3xl font-bold ${matchPercent >= 50 ? "text-emerald-400" : "text-amber-400"}`}>
-            {matchPercent}%
-          </span> */}
-          <p className="text-xs text-muted-foreground">skill match</p>
-        </div>
-      </div>
+      <div className="absolute right-0 top-0 h-48 w-48  pointer-events-none" />
 
-      {/* Salary & Jobs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <Card className="border-border/60 bg-secondary/30">
-          <CardContent className="p-3 flex items-center gap-2.5">
-            <DollarSign className="h-4 w-4 text-muted-foreground shrink-0" />
-            <div>
-              <p className="text-sm font-medium text-foreground">{role.salary}</p>
-              <p className="text-xs text-muted-foreground">Salary range</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-border/60 bg-secondary/30">
-          <CardContent className="p-3 flex items-center gap-2.5">
-            <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
-            <div>
-              <p className="text-sm font-medium text-foreground">{role.companies.length}</p>
-              <p className="text-xs text-muted-foreground">Hiring companies</p>
-            </div>
-          </CardContent>
-        </Card>
+      <h2 className="text-lg font-bold">{role.role}</h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        {role.salary} · {role.companies.length} companies hiring
+      </p>
+
+      {/* Skills */}
+      <div className="mt-6 grid  gap-6">
+        <div>
+          <p className="mb-2 text-xs font-extrabold uppercase tracking-wide text-emerald-400">
+            ✓ Skills You Have
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {role.matchedSkills.length ? (
+              role.matchedSkills.map((s) => (
+                <span
+                  key={s}
+                  className="rounded-full border border-emerald-500/30 px-3 py-1 text-xs capitalize text-emerald-400"
+                >
+                  {s}
+                </span>
+              ))
+            ) : (
+              <span className="text-xs text-muted-foreground">
+                None yet
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <p className="mb-2 text-xs font-extrabold uppercase tracking-wide text-amber-400">
+            ↑ Skills to Learn
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {role.missingSkills.length ? (
+              role.missingSkills.map((s) => (
+                <span
+                  key={s}
+                  className="rounded-full border border-amber-500/30 px-3 py-1 text-xs capitalize text-amber-400"
+                >
+                  {s}
+                </span>
+              ))
+            ) : (
+              <span className="text-xs text-emerald-400">
+                Fully qualified
+              </span>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Companies */}
-      <div className="space-y-2">
-        <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-          <Building2 className="h-3 w-3" /> Companies hiring
-        </p>
-        <div className="flex flex-wrap gap-1.5">
-          {role.companies.map((c) => (
-            <Badge key={c} variant="secondary" className="text-xs font-normal">
-              {c.trim()}
-            </Badge>
-          ))}
-        </div>
-      </div>
-
-      {/* Skills */}
-      <div className="grid grid-cols-1 gap-4">
-        <div className="space-y-2">
-          <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-            <Target className="h-3 w-3" /> Matched skills ({role.matchedSkills.length})
+      {role.companies.length > 0 && (
+        <div className="mt-6">
+          <p className="mb-2 text-xs font-extrabold uppercase tracking-wide">
+            Companies Hiring
           </p>
-          <div className="flex flex-wrap gap-1.5">
-            {role.matchedSkills.map((s) => (
-              <Badge key={s} className="text-xs font-normal bg-primary/15 text-primary border-primary/20">
-                {s}
-              </Badge>
+          <div className="flex flex-wrap gap-2">
+            {role.companies.map((c) => (
+              <span
+                key={c}
+                className="rounded-full border border-border px-3 py-1 text-xs"
+              >
+                {c}
+              </span>
             ))}
           </div>
         </div>
-        <div className="space-y-2">
-          <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-            <GraduationCap className="h-3 w-3" /> Missing skills ({role.missingSkills.length})
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            {role.missingSkills.map((s) => (
-              <Badge key={s} variant="outline" className="text-xs font-normal border-amber-500/30 text-amber-400/80">
-                {s}
-              </Badge>
-            ))}
-          </div>
-        </div>
-      </div>
+      )}
     </motion.div>
   );
 }
 
+/* ───────────────── Main Page ───────────────── */
 const CareerProgressionPage = () => {
-  
-  const [selectedRoleName, setSelectedRoleName] = useState<string | null>(null);
-  const handleSelectRole = useCallback((name: string) => {
-    setSelectedRoleName((prev) => (prev === name ? null : name));
+  const { data, isLoading, isError } = useCareerProgression();
+  const careerPath: CareerRole[] = data?.careerPath ?? [];
+
+  const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [translate, setTranslate] = useState({ x: 0, y: 70 });
+
+  const treeData = careerPath.length ? buildTree(careerPath) : null;
+
+  useEffect(() => {
+    if (careerPath.length && !selectedRole) {
+      setSelectedRole(careerPath[0].role);
+    }
+  }, [careerPath]);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      const w = containerRef.current.getBoundingClientRect().width;
+      setTranslate({ x: w / 2, y: 110 });
+    }
+  }, [treeData]);
+
+  const handleSelect = useCallback((name: string) => {
+    setSelectedRole(name);
   }, []);
-  const{data:career,isLoading,isError}=useCareerProgression()
-  console.log("data",career)
-  const careerPath = career?.careerPath ?? [];
-  const treeData = useMemo(
-  () => buildTreeData(careerPath),
-  [careerPath]
-);
-useEffect(() => {
-  if (careerPath.length > 0 && !selectedRoleName) {
-    setSelectedRoleName(careerPath[0].role);
-  }
-}, [careerPath, selectedRoleName]);
+
+  const selected = careerPath.find((r) => r.role === selectedRole) ?? null;
+
   if (isLoading) {
     return (
       <AppLayout>
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="flex min-h-[70vh] items-center justify-center">
           <div className="flex flex-col items-center gap-3">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
-            <p className="text-sm text-muted-foreground">Loading profile…</p>
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            <p className="text-sm text-muted-foreground">
+              Analysing your career path…
+            </p>
           </div>
         </div>
       </AppLayout>
@@ -216,101 +230,69 @@ useEffect(() => {
       </AppLayout>
     );
   }
-  
-
- const selectedRole =
-  careerPath.find((r) => r.role === selectedRoleName) || null;
-
-  
 
   return (
     <AppLayout>
-      <div className="max-w-full mx-auto px-4 sm:px-6 py-8 space-y-6">
+      <div className="mx-auto max-w-full px-6 py-3">
         {/* Header */}
-        <motion.div
-  initial={{ opacity: 0, y: -10 }}
-  animate={{ opacity: 1, y: 0 }}
-  className="space-y-1"
+        <div
+  className="mb-6 inline-block"
+  title=" This feature is in beta and will improve with more data."
 >
   <div className="flex items-center gap-2">
-    <h1 className="text-2xl font-bold text-foreground">
+    <h1 className="text-2xl font-bold">
       Career Progression
     </h1>
 
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger >
-          <Badge  className="cursor-default">
-            Beta
-          </Badge>
-        </TooltipTrigger>
-        <TooltipContent className="max-w-[240px] text-xs">
-          Career progression is in beta and may improve as we gather more real-world data.
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    {/* BETA tag */}
+    <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[14px] font-semibold uppercase tracking-wide text-primary">
+      Beta
+    </span>
   </div>
 
-  <p className="text-muted-foreground text-sm">
-    Explore career paths based on your skills — click a node to see details.
+  <p className="text-sm ">
+    Click any role in the tree to explore details
   </p>
-</motion.div>
+</div>
 
-        {/* Two-column: Tree left, Detail right */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" style={{ minHeight: 450 }}>
-          {/* Left: D3 Tree */}
-        <Card className="border-border bg-background w-full max-w-[520px] mx-auto">
-            <CardContent className="p-0 aspect-square max-h-[520px] relative mx-auto">
-              {careerPath.length > 0 ? (
-  <Tree
-    data={treeData}
-    orientation="vertical"
-    translate={{ x: 250, y: 60 }}
-    zoomable={false}
-    draggable={true}
-    collapsible={false}
-   nodeSize={{ x: 200, y: 220 }}
-          separation={{ siblings: 1.6, nonSiblings: 2 }}
-    renderCustomNodeElement={(props) =>
-      renderCustomNode({
-        ...props,
-        onSelectRole: handleSelectRole,
-        selectedRole: selectedRoleName,
-      })
-    }
-  />
-) : (
-  <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-    No career paths found for your profile
-  </div>
-)}
-            </CardContent>
-          </Card>
-
-          {/* Right: Detail panel */}
-          <div className="min-h-[300px]">
-            <AnimatePresence mode="wait">
-              {selectedRole ? (
-                <Card key={selectedRole.role} className="border-border/60 bg-card/90 h-full">
-                  <CardContent className="p-5 sm:p-6">
-                    <RoleDetailPanel role={selectedRole} />
-                  </CardContent>
-                </Card>
-              ) : (
-                <motion.div
-                  key="placeholder"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="flex flex-col items-center justify-center h-full min-h-[300px] text-center p-8 border border-dashed border-border/60 rounded-xl"
-                >
-                  <Target className="h-10 w-10 text-muted-foreground/40 mb-3" />
-                  <p className="text-sm text-muted-foreground">
-                    Click a role node in the tree to view details
-                  </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
+        {/* Layout */}
+      <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
+          <div
+            ref={containerRef}
+            className="min-h-[420px] rounded-2xl border border-border bg-background"
+          >
+            {treeData && (
+              <Tree
+                data={treeData}
+                orientation="vertical"
+                translate={translate}
+                zoomable={false}
+                collapsible={false}
+            
+              nodeSize={{ x: 260, y: 260 }}
+            separation={{ siblings: 1.2, nonSiblings: 1.5 }}
+               
+                renderCustomNodeElement={(props) => (
+                  <CustomNode
+                    {...props}
+                    selectedRole={selectedRole}
+                    onSelect={handleSelect}
+                  />
+                )}
+              />
+            )}
           </div>
+
+          {/* Detail */}
+          <AnimatePresence mode="wait">
+            {selected ? (
+              <DetailPanel role={selected} />
+            ) : (
+              <div className="flex h-full items-center justify-center rounded-2xl border border-dashed border-border text-sm text-muted-foreground">
+                Select a role to explore
+              </div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </AppLayout>
