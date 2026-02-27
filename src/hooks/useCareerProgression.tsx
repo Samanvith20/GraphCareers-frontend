@@ -8,12 +8,14 @@ async function fetchcareerProgression() {
     credentials: "include",
   });
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch profile");
-  }
+ 
 
 
    const data = await res.json();
+    // 🔴 real server failure only
+  if (res.status >= 500) {
+    throw new Error("Server error");
+  }
  
   return data;
 }

@@ -19,6 +19,8 @@ export const useUpdateProfile = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
+      queryClient.invalidateQueries({ queryKey: ["match-job"] });
+      queryClient.invalidateQueries({ queryKey: ["career"] });
     },
   });
 };

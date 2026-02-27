@@ -4,6 +4,8 @@ import Tree from "react-d3-tree";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState, useCallback } from "react";
 import ErrorPage from "./ErrorPage";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 /* ───────────────── Types ───────────────── */
 interface CareerRole {
@@ -222,26 +224,68 @@ const CareerProgressionPage = () => {
       </AppLayout>
     );
   }
+  console.log("data::",data)
+  
 
-  if (data?.error === "Add your skills to see career progression") {
+  if (data?.message === "Add your skills to see career progression") {
   return (
     <AppLayout>
-      <div className="flex min-h-[60vh] flex-col items-center justify-center text-center gap-3">
-        <h2 className="text-xl font-semibold">
-          Add your skills to unlock career progression 🚀
-        </h2>
-        <p className="text-sm text-muted-foreground max-w-md">
-          We use your skills to map the best roles and growth path for you.
-        </p>
+      <div className="flex min-h-[70vh] items-center  justify-center px-4">
+        <div className="w-full max-w-lg rounded-2xl border border-border  p-6 text-center">
 
-        {/* Optional CTA */}
-        <button className="mt-3 rounded-lg bg-primary px-4 py-2 text-sm text-white">
-          Add Skills
-        </button>
+          <h2 className="text-lg font-semibold">
+            Add your skills to unlock career progression
+          </h2>
+
+          <p className="mt-2 text-sm ">
+            We use your skills to map suitable roles and show how your career can grow.
+          </p>
+
+          <Link to="/profile">
+            <Button variant="hero" size="sm" className="mt-3">
+              Update Profile
+            </Button>
+            </Link>
+
+        </div>
       </div>
     </AppLayout>
   );
 }
+  if (careerPath.length === 0) {
+  return (
+    <AppLayout>
+      <div className="flex min-h-[70vh] items-center justify-center px-4">
+        <div className="w-full max-w-lg rounded-2xl border border-border bg-background/60 p-6 text-center">
+
+          <h2 className="text-lg font-semibold">
+            We couldn’t generate a career path yet
+          </h2>
+
+          <p className="mt-2 text-sm ">
+            This can happen if your skills are too few, too broad,
+            or don’t clearly map to specific roles.
+          </p>
+
+          <ul className="mt-4 space-y-1 text-sm font-mediumtext-muted-foreground text-left">
+            <li>• Try adding more specific skills</li>
+            <li>• Remove unrelated or outdated skills</li>
+           
+          </ul>
+
+         <Link to="/profile">
+            <Button variant="hero" size="sm" className="mt-3">
+              Update Profile
+            </Button>
+            </Link>
+
+        </div>
+      </div>
+    </AppLayout>
+  );
+}
+
+ 
 
   if (isError) {
     return (

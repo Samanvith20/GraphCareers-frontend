@@ -28,11 +28,11 @@ export function useMatchedJobs() {
     queryKey: ["match-jobs"],
     queryFn: fetchMatchedJobs,
 
-    // // ✅ caching strategy for jobs
-    // staleTime: 7 * 60 * 1000, // 7 minutes
-    // gcTime: 15 * 60 * 1000,   // 15 minutes
+    // ✅ caching strategy for jobs
+    staleTime: 30 * 60 * 1000, // 30 mins
+    gcTime: 60 * 60 * 1000,    // keep cache for 1 hour
 
-    // // ✅ UX
-    // retry: 2,
+    // ✅ UX
+    retry: 2,
   });
 }
