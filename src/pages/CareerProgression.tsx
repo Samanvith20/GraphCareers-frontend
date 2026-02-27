@@ -223,6 +223,26 @@ const CareerProgressionPage = () => {
     );
   }
 
+  if (data?.error === "Add your skills to see career progression") {
+  return (
+    <AppLayout>
+      <div className="flex min-h-[60vh] flex-col items-center justify-center text-center gap-3">
+        <h2 className="text-xl font-semibold">
+          Add your skills to unlock career progression 🚀
+        </h2>
+        <p className="text-sm text-muted-foreground max-w-md">
+          We use your skills to map the best roles and growth path for you.
+        </p>
+
+        {/* Optional CTA */}
+        <button className="mt-3 rounded-lg bg-primary px-4 py-2 text-sm text-white">
+          Add Skills
+        </button>
+      </div>
+    </AppLayout>
+  );
+}
+
   if (isError) {
     return (
       <AppLayout>
