@@ -4,35 +4,50 @@ import {
   TrendingUp,
   LayoutDashboard,
   MessageSquare,
+  Search,
+  Target,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 const features = [
   {
-    icon: Network,
+    icon: Search,
+    title: "Multi-Platform Job Scraping",
+    description:
+      "We automatically scan Naukri, Foundit, LinkedIn, and more — aggregating thousands of fresh listings daily so you never miss a relevant opening.",
+    gradient: "from-primary/20 to-primary/5",
+  },
+  {
+    icon: Target,
     title: "Skill-Based Job Matching",
     description:
-      "Our graph database maps the relationships between your skills and thousands of scraped job listings — surfacing roles you'd never find through keyword search alone.",
+      "Upload your resume or add skills manually. Our engine matches you to jobs by analyzing required skills vs. yours, showing match percentages and skill gaps.",
+    gradient: "from-accent/20 to-accent/5",
   },
   {
     icon: TrendingUp,
-    title: "Career Path Visualization",
+    title: "Career Progression Map",
     description:
-      "See real market data on salary ranges, growth trajectories, and which companies are actively hiring. Plan your next move based on evidence, not anecdotes.",
+      "Visualize your growth paths — see which roles you're ready for, what skills to learn next, salary ranges, and which companies are hiring for those roles.",
+    gradient: "from-primary/15 to-accent/10",
   },
   {
     icon: LayoutDashboard,
     title: "Centralized Job Tracker",
     description:
-      "Track every application in one place. Monitor statuses, deadlines, and follow-ups without switching between tabs or spreadsheets.",
+      "Track every application in one place — saved, applied, interviewing, or ignored. No more spreadsheets or switching between browser tabs.",
+    gradient: "from-accent/15 to-primary/10",
   },
   {
     icon: MessageSquare,
     title: "AI Career Assistant",
     description:
-      "An RAG-powered chat interface trained on real job market data. Ask about career transitions, skill gaps, or interview prep and get grounded, personalized answers.",
+      "An RAG-powered chat assistant that understands your resume and the job market. Ask about skill gaps, interview prep, salary insights, or which roles to target next.",
+    comingSoon: true,
+    gradient: "from-primary/10 to-accent/15",
   },
 ];
+
 
 const containerVariants = {
   hidden: {},
@@ -46,7 +61,7 @@ const cardVariants = {
 
 const Features = () => {
   return (
-    <section className="relative py-28 px-6">
+    <section className="relative py-12 px-6">
       <div className="max-w-6xl mx-auto">
         <motion.div
           className="text-center mb-16"

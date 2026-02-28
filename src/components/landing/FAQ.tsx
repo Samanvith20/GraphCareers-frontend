@@ -32,16 +32,12 @@ const faqs = [
     answer:
       "Our AI uses Retrieval-Augmented Generation (RAG) grounded in real, live job market data. Instead of generic career advice, it gives you answers backed by current salary figures, actual job openings, and real skill-demand trends specific to your target roles.",
   },
-  {
-    question: "Is there a free plan available?",
-    answer:
-      "Yes! Our Starter plan is completely free and includes skill-based job matching, basic career path visualization, and up to 25 tracked applications. Upgrade anytime for unlimited access and AI-powered features.",
-  },
+  
 ];
 
 const FAQ = () => {
   return (
-    <section className="relative py-28 px-6">
+    <section className="relative py-10 px-6">
       <div className="max-w-3xl mx-auto">
         <motion.div
           className="text-center mb-16"

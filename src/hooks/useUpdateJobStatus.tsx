@@ -11,6 +11,7 @@ export function useUpsertJobStatus() {
       company?: string;
       source: string;
       status: string;
+      notes:string;
     }) => {
       const res = await fetch(
         `${BASE_URL}/api/job-applications`,

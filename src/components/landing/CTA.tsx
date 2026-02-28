@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 
 const CTA = () => {
   return (
-    <section className="relative py-28 px-6">
+    <section className="relative py-14 px-6">
       <div className="max-w-3xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
