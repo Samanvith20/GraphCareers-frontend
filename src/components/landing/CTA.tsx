@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Link } from "react-router-dom";
 
 const CTA = () => {
   return (
@@ -21,10 +22,12 @@ const CTA = () => {
             <p className="relative text-muted-foreground text-lg mb-8 max-w-xl mx-auto">
               Join thousands of professionals using data-driven insights to find their next role faster.
             </p>
+            <Link to ="/jobs">
             <Button variant="hero" size="lg" className="relative group">
               Start for Free
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
+            </Link>
           </Card>
         </motion.div>
       </div>

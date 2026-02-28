@@ -38,7 +38,7 @@ const LoginPage = () => {
     });
 
      toast.success("Logged in successfully");
-    navigate("/jobs");
+    navigate("/profile");
   } catch (err) {
     toast.error(err.message || "Login failed");
   } finally {

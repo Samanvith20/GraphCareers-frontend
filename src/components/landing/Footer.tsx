@@ -2,18 +2,39 @@ import { Separator } from "@/components/ui/separator";
 
 const Footer = () => {
   return (
-    <footer>
+    <footer className="mt-20">
       <Separator />
-      <div className="py-12 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span className="text-sm text-muted-foreground">
-            © 2026 GraphCareers. All rights reserved.
-          </span>
-          <div className="flex gap-6 text-sm text-muted-foreground">
-            <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
-            <a href="#" className="hover:text-foreground transition-colors">Terms</a>
-            <a href="#" className="hover:text-foreground transition-colors">Contact</a>
+
+      <div className="py-10 px-6">
+        <div className="max-w-6xl mx-auto grid gap-6 sm:grid-cols-2 items-center">
+
+          {/* Left */}
+          <div className="text-sm text-muted-foreground">
+            <p>© 2026 <span className="font-medium text-foreground">GraphCareers</span>. All rights reserved.</p>
+            <p className="mt-1">
+              Support:{" "}
+              <a
+                href="mailto:support@graphcareers.com"
+                className="hover:text-foreground underline underline-offset-4"
+              >
+                support@graphcareers.com
+              </a>
+            </p>
           </div>
+
+          {/* Right */}
+          <div className="flex flex-wrap gap-6 text-sm text-muted-foreground sm:justify-end">
+            <a href="/privacy" className="hover:text-foreground transition-colors">
+              Privacy Policy
+            </a>
+            <a href="/terms" className="hover:text-foreground transition-colors">
+              Terms
+            </a>
+            <a href="/contact" className="hover:text-foreground transition-colors">
+              Contact
+            </a>
+          </div>
+
         </div>
       </div>
     </footer>

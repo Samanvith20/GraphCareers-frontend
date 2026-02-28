@@ -15,6 +15,10 @@ import ForgotPasswordPage from "./pages/forgotPasswordpage";
 import CareerProgressionPage from "./pages/CareerProgression";
 import ChatPage from "./pages/ChatPage";
 import ResetPasswordPage from "./pages/Resetpassword";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import Contact from "./pages/Contact";
+
 
 
 const queryClient = new QueryClient();
@@ -103,6 +107,9 @@ const App = () => (
           />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
+           <Route path="/privacy" element={<Privacy />} />
+  <Route path="/terms" element={<Terms />} />
+  <Route path="/contact" element={<Contact />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
