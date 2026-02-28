@@ -6,8 +6,6 @@ import heroBg from "@/assets/hero-bg.jpg";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
-
- 
 const Hero = () => {
   const navigate = useNavigate();
   const { data: user, isLoading } = useAuth();
@@ -15,7 +13,11 @@ const Hero = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0">
-        <img src={heroBg} alt="" className="w-full h-full object-cover opacity-30" />
+        <img
+          src={heroBg}
+          alt=""
+          className="w-full h-full object-cover opacity-30"
+        />
         <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
       </div>
       <div className="absolute inset-0 bg-grid opacity-30" />
@@ -32,27 +34,26 @@ const Hero = () => {
           </Badge>
         </motion.div>
 
-       <motion.h1
-  className="text-5xl sm:text-4xl lg:text-7xl font-extrabold tracking-tight leading-[1.1] mb-6"
-  initial={{ opacity: 0, y: 30 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.8, delay: 0.1 }}
->
-  Navigate your career
-  <br />
-  <span className="text-gradient-primary">
-    with skill-matched jobs
-  </span>
-</motion.h1>
+        <motion.h1
+          className="text-5xl sm:text-4xl lg:text-7xl font-extrabold tracking-tight leading-[1.1] mb-6"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.1 }}
+        >
+          Navigate your career
+          <br />
+          <span className="text-gradient-primary">with skill-matched jobs</span>
+        </motion.h1>
         <motion.p
           className="max-w-2xl mx-auto text-lg sm:text-xl text-muted-foreground mb-10 leading-relaxed"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-         GraphCareers scans thousands of jobs from various job platforms & more — matches them to your exact skills — and maps your entire career growth path. All in one place.
+          GraphCareers scans thousands of jobs from various job platforms & more
+          — matches them to your exact skills — and maps your entire career
+          growth path. All in one place.
         </motion.p>
-         
 
         <motion.div
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
@@ -60,11 +61,11 @@ const Hero = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
         >
-          <Link to ="/login">
-          <Button variant="hero" size="lg"  className="group">
-            Get Started Free
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Button>
+          <Link to="/login">
+            <Button variant="hero" size="lg" className="group">
+              Get Started Free
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Button>
           </Link>
           <a href="#how-it-works">
             <Button variant="heroOutline" size="lg">
@@ -73,7 +74,7 @@ const Hero = () => {
           </a>
         </motion.div>
 
-         <motion.div
+        <motion.div
           className="flex flex-wrap  mt-14 items-center justify-center gap-3"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -96,7 +97,6 @@ const Hero = () => {
             </motion.div>
           ))}
         </motion.div>
-        
       </div>
     </section>
   );
