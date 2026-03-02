@@ -110,7 +110,7 @@ const ProfilePage = () => {
     },
     {
       label: "Applications",
-      value: userData.applicationsCount ?? 0,
+      value: userData.applications ?? 0,
       icon: Globe,
     },
   ];

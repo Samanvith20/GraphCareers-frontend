@@ -35,10 +35,11 @@ const ForgotPasswordPage = () => {
       });
 
       const data = await res.json();
+      console.log("data::",data)
 
       if (!res.ok || data.success === false) {
         toast.error(
-          data?.error || "Something went wrong. Please try again."
+          data?.error ||data?.message || "Something went wrong. Please try again."
         );
         return;
       }

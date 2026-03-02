@@ -13,6 +13,7 @@ async function fetchProfile() {
 
 
    const data = await res.json();
+   //console.log("profiledata::",data)
  
   return {
     ...data.profile,
