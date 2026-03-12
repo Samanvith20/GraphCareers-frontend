@@ -398,8 +398,7 @@ const matchStatus =
                   month: "short",
                 },
               );
-              const level =
-                job.level?.trim().toLowerCase() || calculateLevel(job.minExp);
+              const level= calculateLevel(job.minExp);
               const currentStatus = jobStatusMap[job.url] ?? "none";
 
               return (

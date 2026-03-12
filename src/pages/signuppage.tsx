@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 import { apiPost } from "@/lib/api";
+import GoogleSignInButton from "@/components/Googlelogin";
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -174,6 +175,7 @@ const SignupPage = () => {
                 Forgot password?
               </Link>
             </div>
+            <GoogleSignInButton />
 
             <Button
               type="submit"

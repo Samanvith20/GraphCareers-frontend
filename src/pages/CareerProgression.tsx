@@ -224,7 +224,7 @@ const CareerProgressionPage = () => {
       </AppLayout>
     );
   }
-  console.log("data::",data)
+  //.log("data::",data)
   
 
   if (data?.message === "Add your skills to see career progression") {

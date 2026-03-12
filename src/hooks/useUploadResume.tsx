@@ -16,7 +16,7 @@ export const useUploadResume = () => {
 
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error || "Resume upload failed");
+        throw new Error(err.error || err.message || "Resume upload failed");
       }
 
       return res.json();

@@ -27,8 +27,8 @@ export function useCareerProgression() {
     queryFn: fetchcareerProgression,
 
     // ✅ caching strategy
-    staleTime: 30 * 60 * 1000, // 30 mins
-    gcTime: 60 * 60 * 1000,    // keep cache for 1 hour
+      staleTime: 24 * 60 * 60 * 1000, // 24h
+    gcTime: 48 * 60 * 60 * 1000, // keep cache 48h
 
     // ✅ UX behavior
     retry: 2,

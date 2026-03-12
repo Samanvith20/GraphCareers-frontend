@@ -35,7 +35,7 @@ const ForgotPasswordPage = () => {
       });
 
       const data = await res.json();
-      console.log("data::",data)
+      //console.log("data::",data)
 
       if (!res.ok || data.success === false) {
         toast.error(

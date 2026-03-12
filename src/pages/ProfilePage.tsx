@@ -41,6 +41,7 @@ import ErrorPage from "./ErrorPage";
 const ProfilePage = () => {
   // All hooks must be called at the top of the component
   const { data: userData, isLoading, isError } = useProfile();
+  //console.log("userData:;",userData)
   const updateProfile = useUpdateProfile();
   const uploadResume = useUploadResume();
   type ResumeStatus =
@@ -110,7 +111,7 @@ const ProfilePage = () => {
     },
     {
       label: "Applications",
-      value: userData.applications ?? 0,
+      value: userData.applicationsCount ?? 0,
       icon: Globe,
     },
   ];
@@ -187,7 +188,7 @@ const ProfilePage = () => {
       setResumeStatus("completed");
       toast.success("Resume processed and profile updated 🎉");
     } catch (err: any) {
-      console.error(err);
+      //console.error(err);
       setResumeStatus("idle");
       toast.error(err.message || "Resume processing failed");
     }

@@ -18,7 +18,7 @@ async function fetchProfile() {
   return {
     ...data.profile,
     resume: data.resume,
-    applicationsCount: data.applicationsCount,
+    applicationsCount: data.applications,
     skills: data.profile.skills ?? [],
     location: data.profile.location ?? "",
     experience: data.profile.experience ?? 0,

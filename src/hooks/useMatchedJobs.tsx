@@ -29,9 +29,9 @@ export function useMatchedJobs() {
     queryKey: ["match-jobs"],
     queryFn: fetchMatchedJobs,
 
-    // ✅ caching strategy for jobs
-    staleTime: 30 * 60 * 1000, // 30 mins
-    gcTime: 60 * 60 * 1000,    // keep cache for 1 hour
+  // ✅ cache jobs for 24 hours
+    staleTime: 24 * 60 * 60 * 1000, // 24h
+    gcTime: 48 * 60 * 60 * 1000, // keep in memory 4
 
     // ✅ UX
     retry: 2,
