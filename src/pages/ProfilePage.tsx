@@ -40,19 +40,23 @@ import ErrorPage from "./ErrorPage";
 
 const ProfilePage = () => {
   // All hooks must be called at the top of the component
-  const { data: userData, isLoading, isError } = useProfile();
+  
   //console.log("userData:;",userData)
+  
   const updateProfile = useUpdateProfile();
   const uploadResume = useUploadResume();
   type ResumeStatus =
     | "idle"
     | "uploading"
-    | "extracting"
     | "parsing"
     | "completed"
     | "error";
 
   const [resumeStatus, setResumeStatus] = useState<ResumeStatus>("idle");
+  console.log("resumestatus:;",resumeStatus)
+    const { data: userData, isLoading, isError } = useProfile();
+
+
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
     name: userData?.name || "",
@@ -66,8 +70,8 @@ const ProfilePage = () => {
   const [newSkill, setNewSkill] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
 
-  const BASE_URL = import.meta.env.VITE_BACKEND_URL;
   const queryClient = useQueryClient();
+  
 
   useEffect(() => {
     if (!userData) return;
@@ -80,6 +84,22 @@ const ProfilePage = () => {
       role: userData.role || "",
     });
   }, [userData]);
+  useEffect(() => {
+  if (resumeStatus !== "parsing") return;
+
+  const interval = setInterval(() => {
+    queryClient.invalidateQueries({ queryKey: ["profile"] });
+  }, 2000);
+
+  return () => clearInterval(interval);
+}, [resumeStatus]);
+  useEffect(() => {
+  if (resumeStatus === "parsing" && userData?.resume?.parsed) {
+    setResumeStatus("completed");
+
+    toast.success("Resume processed and profile updated 🎉");
+  }
+}, [userData?.resume?.parsed]);
   if (isLoading) {
     return (
       <AppLayout>
@@ -159,40 +179,26 @@ const ProfilePage = () => {
 };
   const isBusy =
     resumeStatus === "uploading" ||
-    resumeStatus === "extracting" ||
     resumeStatus === "parsing";
   const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const file = e.target.files?.[0];
+  if (!file) return;
 
-    setResumeFile(file);
-    setResumeStatus("uploading");
+  setResumeFile(file);
+  setResumeStatus("uploading");
 
-    try {
-      // Step 1: Upload + text extraction
-      await uploadResume.mutateAsync(file);
-      setResumeStatus("extracting");
+  try {
+    await uploadResume.mutateAsync(file);
 
-      // Step 2: AI parsing
-      setResumeStatus("parsing");
-      const res = await fetch(`${BASE_URL}/api/user/resume-parse`, {
-        method: "POST",
-        credentials: "include",
-      });
+    setResumeStatus("parsing");
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || data.message || "AI parsing failed");
-      }
-      await queryClient.invalidateQueries({ queryKey: ["profile"] });
-      setResumeStatus("completed");
-      toast.success("Resume processed and profile updated 🎉");
-    } catch (err: any) {
-      //console.error(err);
-      setResumeStatus("idle");
-      toast.error(err.message || "Resume processing failed");
-    }
-  };
+    toast.info("Parsing resume...");
+
+  } catch (err) {
+    setResumeStatus("idle");
+    toast.error(err.message || "Resume processing failed");
+  }
+};
   const filledBasicInfo = basicInfoFields.filter(Boolean).length;
   const totalBasicInfo = basicInfoFields.length;
 
