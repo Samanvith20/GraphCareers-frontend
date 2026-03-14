@@ -26,7 +26,7 @@ async function fetchProfile() {
   };
 }
 
-export function useProfile() {
+export function useProfile(polling=false) {
   
   return useQuery({
     queryKey: ["profile"],
@@ -40,5 +40,6 @@ export function useProfile() {
     retry: 2,
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
+     refetchInterval: polling ? 2000 : false,
   });
 }

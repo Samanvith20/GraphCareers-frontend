@@ -54,7 +54,7 @@ const ProfilePage = () => {
 
   const [resumeStatus, setResumeStatus] = useState<ResumeStatus>("idle");
   console.log("resumestatus:;",resumeStatus)
-    const { data: userData, isLoading, isError } = useProfile();
+    const { data: userData, isLoading, isError } = useProfile(resumeStatus==="parsing");
 
 
   const [editing, setEditing] = useState(false);
@@ -70,7 +70,7 @@ const ProfilePage = () => {
   const [newSkill, setNewSkill] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
 
-  const queryClient = useQueryClient();
+  const queryClient=useQueryClient()
   
 
   useEffect(() => {
@@ -84,15 +84,7 @@ const ProfilePage = () => {
       role: userData.role || "",
     });
   }, [userData]);
-  useEffect(() => {
-  if (resumeStatus !== "parsing") return;
 
-  const interval = setInterval(() => {
-    queryClient.invalidateQueries({ queryKey: ["profile"] });
-  }, 2000);
-
-  return () => clearInterval(interval);
-}, [resumeStatus]);
   useEffect(() => {
   if (resumeStatus === "parsing" && userData?.resume?.parsed) {
     setResumeStatus("completed");
@@ -189,8 +181,10 @@ const ProfilePage = () => {
 
   try {
     await uploadResume.mutateAsync(file);
+queryClient.invalidateQueries({ queryKey: ["profile"] });
 
     setResumeStatus("parsing");
+
 
     toast.info("Parsing resume...");
 
