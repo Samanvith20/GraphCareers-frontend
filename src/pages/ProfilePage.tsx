@@ -53,7 +53,7 @@ const ProfilePage = () => {
     | "error";
 
   const [resumeStatus, setResumeStatus] = useState<ResumeStatus>("idle");
-  console.log("resumestatus:;",resumeStatus)
+ // console.log("resumestatus:;",resumeStatus)
     const { data: userData, isLoading, isError } = useProfile(resumeStatus==="parsing");
 
 
@@ -86,12 +86,24 @@ const ProfilePage = () => {
   }, [userData]);
 
   useEffect(() => {
-  if (resumeStatus === "parsing" && userData?.resume?.parsed) {
-    setResumeStatus("completed");
+  if (resumeStatus !== "parsing") return;
 
+  const status = userData?.resume?.status;
+
+  if (status === "completed") {
+    setResumeStatus("completed");
     toast.success("Resume processed and profile updated 🎉");
   }
-}, [userData?.resume?.parsed]);
+
+  if (status === "failed") {
+    setResumeStatus("error");
+    toast.error(
+      userData?.resume?.errorMessage ||
+      "Resume parsing failed. Please upload another file (or) try after sometime."
+    );
+  }
+
+}, [userData?.resume?.status]);
   if (isLoading) {
     return (
       <AppLayout>
@@ -178,6 +190,7 @@ const ProfilePage = () => {
 
   setResumeFile(file);
   setResumeStatus("uploading");
+  //console.log("resume uplaod api has been called",Date.now())
 
   try {
     await uploadResume.mutateAsync(file);
@@ -493,7 +506,7 @@ queryClient.invalidateQueries({ queryKey: ["profile"] });
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {!userData.resume.parsed && (
+                  {userData.resume.parsed! == "completed" && (
                     <p className="text-xs text-muted-foreground">
                       Upload your resume and we'll extract your details
                       automatically.
@@ -505,7 +518,7 @@ queryClient.invalidateQueries({ queryKey: ["profile"] });
                     className="flex flex-col items-center gap-2 border border-dashed border-white/15
 hover:border-white/30 rounded-lg p-5 cursor-pointer transition-colors"
                   >
-                    {resumeStatus === "idle" && !userData.resume.parsed && (
+                    {resumeStatus === "idle" && userData.resume.parsed==="completed" && (
                       <>
                         <Upload className="h-8 w-8 text-muted-foreground" />
                         <p className="text-sm font-medium">
@@ -526,7 +539,7 @@ hover:border-white/30 rounded-lg p-5 cursor-pointer transition-colors"
                       </>
                     )}
 
-                    {resumeStatus === "extracting" && (
+                    {/* {resumeStatus === "extracting" && (
                       <>
                         <Clock className="h-8 w-8 text-primary" />
                         <p className="text-sm font-medium">Extracting text…</p>
@@ -535,7 +548,7 @@ hover:border-white/30 rounded-lg p-5 cursor-pointer transition-colors"
                         </p>
                         <Progress value={40} className="h-1.5 w-full" />
                       </>
-                    )}
+                    )} */}
 
                     {resumeStatus === "parsing" && (
                       <>
@@ -596,6 +609,11 @@ hover:border-white/30 rounded-lg p-5 cursor-pointer transition-colors"
                         </Button>
                       </>
                     )}
+                    {resumeStatus === "error" && (
+  <Button onClick={() => setResumeStatus("idle")}>
+    Upload again
+  </Button>
+)}
 
                     <input
                       id="resume-upload"
