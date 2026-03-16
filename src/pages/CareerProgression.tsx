@@ -38,12 +38,16 @@ function CustomNode({
   nodeDatum,
   selectedRole,
   onSelect,
+  isMobile
 }: any) {
   const isRoot = nodeDatum.attributes?.isRoot === "true";
   const isSelected = selectedRole === nodeDatum.name;
 
-  const width = isRoot ? 220 : 190;
-  const height = isRoot ? 120 : 100;
+  const width = isRoot
+  ? isMobile ? 180 : 220
+  : isMobile ? 150 : 190;
+
+const height = isMobile ? 90 : isRoot ? 120 : 100;
 
   return (
     <foreignObject
@@ -190,6 +194,26 @@ const CareerProgressionPage = () => {
   const [translate, setTranslate] = useState({ x: 0, y: 70 });
 
   const treeData = careerPath.length ? buildTree(careerPath) : null;
+  const [isMobile, setIsMobile] = useState(false);
+  const [showBanner, setShowBanner] = useState(
+  !sessionStorage.getItem("career-desktop-banner")
+);
+
+const dismiss = () => {
+  sessionStorage.setItem("career-desktop-banner", "true");
+  setShowBanner(false);
+};
+
+useEffect(() => {
+  const check = () => {
+    setIsMobile(window.innerWidth < 768);
+  };
+
+  check();
+  window.addEventListener("resize", check);
+
+  return () => window.removeEventListener("resize", check);
+}, []);
 
   useEffect(() => {
     if (careerPath.length && !selectedRole) {
@@ -285,6 +309,7 @@ const CareerProgressionPage = () => {
   );
 }
 
+
  
 
   if (isError) {
@@ -319,11 +344,56 @@ const CareerProgressionPage = () => {
   </p>
 </div>
 
+{isMobile && showBanner && (
+  <div className="mb-4 flex items-start justify-between gap-4 rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 backdrop-blur-sm">
+    
+    <div className="flex items-start gap-3">
+      
+      {/* Icon */}
+      <div className="mt-0.5 rounded-md bg-amber-500/10 p-1.5 text-amber-400">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-4 w-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <circle cx="12" cy="16" r="1" />
+        </svg>
+      </div>
+
+      {/* Text */}
+      <div className="text-sm">
+        <p className="font-medium text-amber-400">
+          Best viewed on desktop
+        </p>
+
+        <p className="text-muted-foreground">
+          The career progression tree works better on larger screens.
+        </p>
+      </div>
+
+    </div>
+
+    {/* Dismiss */}
+    <button
+      onClick={dismiss}
+      className="text-xs text-muted-foreground hover:text-foreground transition"
+    >
+      Dismiss
+    </button>
+
+  </div>
+)}
+
         {/* Layout */}
-      <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
+      <div className="grid gap-4 lg:grid-cols-[1fr_420px]">
           <div
             ref={containerRef}
-            className="min-h-[420px] rounded-2xl border border-border bg-background"
+            className="min-h-[420px] overflow-x-auto rounded-2xl border border-border bg-background"
           >
             {treeData && (
               <Tree
@@ -333,7 +403,7 @@ const CareerProgressionPage = () => {
                 zoomable={false}
                 collapsible={false}
             
-              nodeSize={{ x: 260, y: 260 }}
+              nodeSize={isMobile ? { x: 200, y: 180 } : { x: 260, y: 260 }}
             separation={{ siblings: 1.2, nonSiblings: 1.5 }}
                
                 renderCustomNodeElement={(props) => (
@@ -341,6 +411,7 @@ const CareerProgressionPage = () => {
                     {...props}
                     selectedRole={selectedRole}
                     onSelect={handleSelect}
+                    isMobile={isMobile}
                   />
                 )}
               />
