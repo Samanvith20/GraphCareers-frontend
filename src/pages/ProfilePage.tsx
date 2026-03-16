@@ -53,7 +53,7 @@ const ProfilePage = () => {
     | "error";
 
   const [resumeStatus, setResumeStatus] = useState<ResumeStatus>("idle");
- // console.log("resumestatus:;",resumeStatus)
+ //console.log("resumestatus:;",resumeStatus)
     const { data: userData, isLoading, isError } = useProfile(resumeStatus==="parsing");
 
 
@@ -184,27 +184,28 @@ const ProfilePage = () => {
   const isBusy =
     resumeStatus === "uploading" ||
     resumeStatus === "parsing";
-  const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  
+    const handleResumeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
   const file = e.target.files?.[0];
   if (!file) return;
 
+  e.target.value = "";
   setResumeFile(file);
   setResumeStatus("uploading");
-  //console.log("resume uplaod api has been called",Date.now())
+  uploadResume.reset();
 
-  try {
-    await uploadResume.mutateAsync(file);
-queryClient.invalidateQueries({ queryKey: ["profile"] });
-
-    setResumeStatus("parsing");
-
-
-    toast.info("Parsing resume...");
-
-  } catch (err) {
-    setResumeStatus("idle");
-    toast.error(err.message || "Resume processing failed");
-  }
+  // ✅ Use mutate with callbacks — no Promise to get stuck on
+  uploadResume.mutate(file, {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      setResumeStatus("parsing");
+      toast.info("Parsing resume...");
+    },
+    onError: (err: any) => {
+      setResumeStatus("idle");
+      toast.error(err.message || "Resume processing failed");
+    },
+  });
 };
   const filledBasicInfo = basicInfoFields.filter(Boolean).length;
   const totalBasicInfo = basicInfoFields.length;
@@ -285,6 +286,8 @@ queryClient.invalidateQueries({ queryKey: ["profile"] });
       toast.error("Failed to log out");
     }
   };
+  //console.log("userData",userData.resume)
+  //console.log("resumestatus::",userData.resume.parsed)
 
   return (
     <AppLayout>
@@ -506,19 +509,14 @@ queryClient.invalidateQueries({ queryKey: ["profile"] });
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {userData.resume.parsed! == "completed" && (
-                    <p className="text-xs text-muted-foreground">
-                      Upload your resume and we'll extract your details
-                      automatically.
-                    </p>
-                  )}
+                  
 
                   <label
                     htmlFor="resume-upload"
                     className="flex flex-col items-center gap-2 border border-dashed border-white/15
 hover:border-white/30 rounded-lg p-5 cursor-pointer transition-colors"
                   >
-                    {resumeStatus === "idle" && userData.resume.parsed==="completed" && (
+                    {resumeStatus === "idle" && !userData.resume.parsed  && (
                       <>
                         <Upload className="h-8 w-8 text-muted-foreground" />
                         <p className="text-sm font-medium">
