@@ -5,20 +5,23 @@ const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 async function fetchMatchedJobs() {
   const res = await fetch(`${BASE_URL}/api/jobs`, {
     method: "GET",
-      cache: "no-store",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
     
   });
+   const data = await res.json();
+   if (res.status === 400) {
+    return { jobs: [], error: data.error }; // 👈 don't throw
+  }
 
 
   if (!res.ok) {
-    throw new Error("Failed to fetch jobs");
+  throw new Error(data.error || "Failed to fetch jobs");
   }
 
-  const data = await res.json();
+ 
 // console.log('data:;',data)
 
   return data;

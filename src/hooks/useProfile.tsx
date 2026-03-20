@@ -7,10 +7,10 @@ async function fetchProfile() {
     credentials: "include",
   });
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch profile");
-  }
-
+ if (!res.ok) {
+  const err = await res.json().catch(() => ({}));
+  throw new Error(err.error || "Failed to fetch profile");
+}
 
    const data = await res.json();
    //console.log("profiledata::",data)

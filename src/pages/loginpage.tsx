@@ -18,7 +18,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const valid = username.trim().length > 0 && password.length >= 6;
+  //const valid = username.trim().length > 0 && password.length >= 6;
 
   const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();

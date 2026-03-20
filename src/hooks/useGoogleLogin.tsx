@@ -22,7 +22,7 @@ function GoogleSignIn() {
         }
       }}
       onError={() => {
-        console.log("Login Failed");
+       // console.log("Login Failed");
       }}
     />
   );

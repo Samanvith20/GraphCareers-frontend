@@ -31,12 +31,11 @@ const features = [
       "Track every application in one place — saved, applied, interviewing, or ignored. No more spreadsheets or switching between browser tabs.",
     gradient: "from-accent/15 to-primary/10",
   },
-  {
+   {
     icon: MessageSquare,
-    title: "AI Career Assistant",
+    title: "AI Career Chatbot",
     description:
-      "An RAG-powered chat assistant that understands your resume and the job market. Ask about skill gaps, interview prep, salary insights, or which roles to target next.",
-    comingSoon: true,
+      "A smart chat assistant that knows your resume, skills, and the job market. Ask about skill gaps, career roadmaps, interview prep, or which roles to target next — it's like having a career coach on demand.",
     gradient: "from-primary/10 to-accent/15",
   },
 ];
