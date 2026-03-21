@@ -12,7 +12,7 @@ const navItems = [
   { label: "Tracker", href: "/tracker", icon: LayoutDashboard },
   { label: "Career", href: "/career", icon: TrendingUp },
   { label: "Chat", href: "/chat", icon: MessageSquare },
-  { label: "Profile", href: "/profile", icon: User },
+  { label: "Pricing", href: "/pricing", icon: User },
 ];
 
 const AppLayout = ({ children }) => {

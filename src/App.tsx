@@ -18,6 +18,8 @@ import ResetPasswordPage from "./pages/Resetpassword";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Contact from "./pages/Contact";
+import PricingPage from "./pages/Pricingpage";
+//import { FullPricingPage } from "./components/landing/Pricing";
 
 
 
@@ -79,6 +81,14 @@ const App = () => (
               <PublicRoute>
                 <LoginPage />
               </PublicRoute>
+            }
+          />
+          <Route
+            path="/pricing"
+            element={
+              
+                <PricingPage />
+            
             }
           />
  <Route
