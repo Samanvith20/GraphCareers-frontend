@@ -18,6 +18,7 @@ import {
   Plus,
   Check,
   X,
+  Coins,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -137,6 +138,11 @@ const ProfilePage = () => {
       label: "Applications",
       value: userData.applicationsCount ?? 0,
       icon: Globe,
+    },
+    {
+      label:"Credits",
+      value:userData.credits ?? 0,
+      icon:Coins
     },
   ];
 
@@ -575,9 +581,12 @@ hover:border-white/30 rounded-lg p-5 cursor-pointer transition-colors"
                     {resumeStatus === "idle" && userData.resume.parsed && (
                       <>
                         <FileText className="h-8 w-8 text-primary" />
-                        <p className="text-sm font-medium">
-                          {userData.resume.fileName ?? "Resume uploaded"}
-                        </p>
+                        <p
+  className="text-sm font-medium max-w-full truncate"
+  title={userData.resume.fileName}
+>
+  {userData.resume.fileName}
+</p>
                         <p className="text-xs text-muted-foreground">
                           Uploaded on{" "}
                           {new Date(

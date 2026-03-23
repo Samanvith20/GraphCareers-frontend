@@ -32,12 +32,12 @@ const features = [
     gradient: "from-accent/15 to-primary/10",
   },
    {
-    icon: MessageSquare,
-    title: "AI Career Chatbot",
-    description:
-      "A smart chat assistant that knows your resume, skills, and the job market. Ask about skill gaps, career roadmaps, interview prep, or which roles to target next — it's like having a career coach on demand.",
-    gradient: "from-primary/10 to-accent/15",
-  },
+  icon: MessageSquare,
+  title: "AI Career Agent",
+  description:
+    "Not just a chatbot — an AI agent that reads your resume, scans live job matches, and analyzes your career graph before answering. Ask about skill gaps, your next promotion, pivot opportunities, or interview prep. Backed by real market data, not generic advice.",
+  gradient: "from-primary/10 to-accent/15",
+},
 ];
 
 const containerVariants = {
@@ -90,11 +90,7 @@ const Features = () => {
                 {/* Hover gradient overlay */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-xl`} />
                 
-                {feature.comingSoon && (
-                  <Badge variant="outline" className="absolute top-4 right-4 text-[10px] border-accent/30 text-accent z-10">
-                    Coming Soon
-                  </Badge>
-                )}
+                
                 
                 <div className="relative z-10">
                   <div className="mb-6 inline-flex items-center justify-center h-12 w-12 rounded-xl bg-primary/10 text-primary border border-primary/10 group-hover:shadow-glow transition-shadow duration-500">

@@ -28,11 +28,10 @@ const faqs = [
       "Yes. Our centralized job tracker lets you manually add any application regardless of where you applied. We also auto-detect applications made through our platform and add them to your tracker automatically.",
   },
   {
-    question: "What makes the AI assistant different from ChatGPT?",
-    answer:
-      "Our AI uses Retrieval-Augmented Generation (RAG) grounded in real, live job market data. Instead of generic career advice, it gives you answers backed by current salary figures, actual job openings, and real skill-demand trends specific to your target roles.",
-  },
-  
+  question: "What makes the AI assistant different from ChatGPT?",
+  answer:
+    "Unlike ChatGPT, our assistant is a career-specific AI agent — it actively calls tools to pull your real job matches, live salary data, and career graph before responding. Every answer is grounded in your actual profile and current market data, not generic training knowledge.",
+},
 ];
 
 const FAQ = () => {

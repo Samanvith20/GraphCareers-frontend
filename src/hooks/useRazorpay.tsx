@@ -35,8 +35,8 @@ export const useRazorpayPayment = () => {
       }
 
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: data.amount,
+        key: data.keyId ?? null,
+        amount: data.amount ?? 99,
         currency: "INR",
         name: "GraphCareers",
         description: "Pro Plan",

@@ -31,8 +31,8 @@ const plans = [
     features: [
       "Top 10 job matches/day",
       "Basic career roadmap",
-      "Track up to 20 applications",
-      "AI career coach (5 insights/day)",
+      "Track up to 50 applications",
+      "AI career coach (10 insights)",
       "1 resume analysis",
     ],
     cta: "Start Free",
@@ -48,7 +48,7 @@ const plans = [
       "Unlimited job matches",
       "Full career roadmap + salary insights",
       "Unlimited job tracking",
-      "AI career coach (50–100 insights/day)",
+      "AI career coach (100 insights)",
       "Resume re-analysis & improvements",
       "Deep skill gap insights",
       "Priority job ranking",
@@ -60,11 +60,11 @@ const plans = [
 
 const comparisonRows = [
   ["Job Matches", "10/day", "Unlimited"],
-  ["AI Career Coach", "5 insights", "50 insights"],
-  ["Resume Analysis", "1/month", "Unlimited"],
+  ["AI Career Coach", "10 insights", "100 insights"],
+  ["Resume Analysis", "1", "Unlimited"],
   ["Career Roadmap", "Basic", "Full + Salary Data"],
   ["Skill Gap Insights", false, true],
-  ["Job Tracking", "20 apps", "Unlimited"],
+  ["Job Tracking", "20", "Unlimited"],
   ["Priority Job Ranking", false, true],
 ];
 
