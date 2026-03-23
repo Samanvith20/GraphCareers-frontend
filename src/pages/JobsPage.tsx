@@ -121,6 +121,7 @@ const JobsPage = () => {
   const [selectedExpRange, setSelectedExpRange] = useState("all");
   const [selectedRole,     setSelectedRole]     = useState("all");
   const [selectedStatus,   setSelectedStatus]   = useState("all");
+  const [selectedDate, setSelectedDate]         = useState("all");
 
   const { data: profile }              = useProfile();
   const { data: jobApplications = [] } = useUserJobApplications();
@@ -204,8 +205,14 @@ const JobsPage = () => {
         mapJobExperience(job.minExp, job.maxExp) === selectedExpRange) &&
 
       (selectedRole === "all" ||
-        job.role?.toLowerCase() === selectedRole.toLowerCase())
+        job.role?.toLowerCase() === selectedRole.toLowerCase()) &&
+         (selectedDate === "all" ||
+      (selectedDate === "today" && job.daysAgo === 0) ||
+      (selectedDate === "yesterday" && job.daysAgo === 1) ||
+      (selectedDate === "older" && job.daysAgo >= 2)
+    )
     );
+
   });
   // No re-sort needed — backend already sorted by qualityScore DESC → matchPercent DESC → hoursOld ASC
 
@@ -221,6 +228,7 @@ const JobsPage = () => {
     setSelectedExpRange("all");
     setSelectedRole("all");
     setSelectedStatus("all");
+    setSelectedDate("all")
   };
 
   // ── Render ─────────────────────────────────────────────────────────────────
@@ -309,7 +317,7 @@ const JobsPage = () => {
             </SelectContent>
           </Select>
 
-          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+          {/* <Select value={selectedStatus} onValueChange={setSelectedStatus}>
             <SelectTrigger className="h-10 w-[150px]"><SelectValue placeholder="Status" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
@@ -318,7 +326,18 @@ const JobsPage = () => {
               <SelectItem value="ignored">Ignored</SelectItem>
               <SelectItem value="none">Not tracked</SelectItem>
             </SelectContent>
-          </Select>
+          </Select> */}
+          <Select value={selectedDate} onValueChange={setSelectedDate}>
+  <SelectTrigger className="h-10 w-[140px]">
+    <SelectValue placeholder="Date" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectItem value="all">All Dates</SelectItem>
+    <SelectItem value="today">Today</SelectItem>
+    <SelectItem value="yesterday">Yesterday</SelectItem>
+    <SelectItem value="older">2+ Days</SelectItem>
+  </SelectContent>
+</Select>
 
           <Button variant="ghost" size="sm" className="h-10 border border-white/50" onClick={clearFilters}>
             Clear
@@ -519,6 +538,93 @@ const JobsPage = () => {
             </Button>
           </motion.div>
         )}
+        {!isPro && (
+  <div className="mt-6 relative">
+
+    {/* 🔒 Overlay text */}
+    <div className="text-center mb-4">
+      <p className="text-sm text-muted-foreground">
+        🔒 more high-quality jobs  hidden
+      </p>
+      <p className="text-xs text-muted-foreground">
+        Upgrade to unlock personalized opportunities
+      </p>
+    </div>
+
+    {/* 👇 SAME CARD STRUCTURE */}
+    <div className="grid md:grid-cols-2 gap-4 relative">
+
+      {[1,2,3,4].map((i) => (
+        <div key={i} className="relative">
+
+          {/* 🔥 BLURRED REAL CARD */}
+          <div className="opacity-70 blur-[2px] pointer-events-none">
+            <Card className="card-hover border border-white/20 h-full flex flex-col">
+              <CardContent className="p-5 flex flex-col gap-4 h-full">
+
+                {/* Top */}
+                <div className="flex justify-between">
+                  <div>
+                    <div className="flex gap-2 mb-1">
+                      <span className="text-xs px-2 py-0.5 rounded border bg-primary/10 text-primary">entry</span>
+                      <span className="text-xs px-2 py-0.5 rounded border">foundit</span>
+                    </div>
+                    <div className="h-4 w-40 bg-muted rounded mb-2" />
+                    <div className="h-3 w-28 bg-muted rounded" />
+                  </div>
+
+                  {/* fake match ring */}
+                  <div className="h-10 w-10 rounded-full border border-muted flex items-center justify-center text-xs">
+                    92%
+                  </div>
+                </div>
+
+                {/* Meta */}
+                <div className="flex gap-3 text-xs">
+                  <div className="h-3 w-20 bg-muted rounded" />
+                  <div className="h-3 w-16 bg-muted rounded" />
+                </div>
+
+                {/* Skills */}
+                <div className="flex gap-2 flex-wrap">
+                  {[1,2,3].map(s => (
+                    <div key={s} className="h-5 w-16 bg-muted rounded-full" />
+                  ))}
+                </div>
+
+                {/* Footer */}
+                <div className="flex justify-between mt-auto">
+                  <div className="h-6 w-20 bg-muted rounded" />
+                  <div className="h-8 w-16 bg-muted rounded" />
+                </div>
+
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* 🔥 LOCK OVERLAY */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs text-white flex items-center gap-1">
+              <Lock className="h-3 w-3" />
+              Locked
+            </div>
+          </div>
+
+        </div>
+      ))}
+    </div>
+
+    {/* CTA */}
+    <div className="flex justify-center mt-6">
+      <Link to="/pricing">
+        <Button variant="hero" className="px-6">
+          🔥 Unlock All Matches
+        </Button>
+      </Link>
+    </div>
+
+  </div>
+)}
 
       </div>
     </AppLayout>

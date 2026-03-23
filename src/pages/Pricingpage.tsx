@@ -23,49 +23,55 @@ import AppLayout from "@/components/layout/AppLayout";
 import { useRazorpayPayment } from "@/hooks/useRazorpay";
 
 const plans = [
-  {
-    name: "Starter",
-    price: "Free",
-    period: "",
-    description: "Perfect to get started and explore your career path.",
-    features: [
-      "Top 10 job matches/day",
-      "Basic career roadmap",
-      "Track up to 50 applications",
-      "AI career coach (10 insights)",
-      "1 resume analysis",
-    ],
-    cta: "Start Free",
-    popular: false,
-  },
-  {
-    name: "Pro",
-    price: "₹99",
-    period: "/month",
-    description: "Unlock better matches and accelerate your career growth.",
-    highlight: "Less than ₹4/day",
-    features: [
-      "Unlimited job matches",
-      "Full career roadmap + salary insights",
-      "Unlimited job tracking",
-      "AI career coach (100 insights)",
-      "Resume re-analysis & improvements",
-      "Deep skill gap insights",
-      "Priority job ranking",
-    ],
-    cta: "Unlock Better Jobs",
-    popular: true,
-  },
+{
+name: "Starter",
+price: "Free",
+period: "",
+description: "Start exploring your career with powerful AI tools — no payment needed.",
+features: [
+"🎁 Get 10 free credits to try everything",
+"Top 10 job matches/day",
+"Basic career roadmap",
+"Track up to 50 applications",
+"AI career coach (pay per use with credits)",
+"Resume analysis (pay per use with credits)",
+],
+note: "No credit card required",
+cta: "Start Free",
+popular: false,
+},
+{
+name: "Pro",
+price: "₹99",
+period: "/month",
+description: "Get faster results, deeper insights, and land better opportunities.",
+highlight: "🚀 Most Popular • Less than ₹4/day",
+features: [
+"💎 Get 100 credits every month",
+"Unlimited job matches",
+"Full career roadmap + salary insights",
+"Unlimited job tracking",
+"AI career coach (pay per use with credits)",
+"Resume analysis & improvements (pay per use)",
+"Deep skill gap insights",
+"Priority job ranking (get noticed faster)",
+],
+note: "Cancel anytime • No hidden charges",
+cta: "Upgrade to Pro",
+popular: true,
+},
 ];
 
+
 const comparisonRows = [
-  ["Job Matches", "10/day", "Unlimited"],
-  ["AI Career Coach", "10 insights", "100 insights"],
-  ["Resume Analysis", "1", "Unlimited"],
-  ["Career Roadmap", "Basic", "Full + Salary Data"],
-  ["Skill Gap Insights", false, true],
-  ["Job Tracking", "20", "Unlimited"],
-  ["Priority Job Ranking", false, true],
+["Credits", "🎁 10 free credits", "💎 100 credits/month"],
+["Job Matches", "10/day", "Unlimited"],
+["AI Career Coach", "Uses credits", "Uses credits"],
+["Resume Analysis", "Uses credits", "Uses credits"],
+["Career Roadmap", "Basic", "Full + Salary Data"],
+["Skill Gap Insights", "Limited", "Advanced"],
+["Job Tracking", "Up to 50", "Unlimited"],
+["Priority Job Ranking", "—", "✔"],
 ];
 
 const faqs = [

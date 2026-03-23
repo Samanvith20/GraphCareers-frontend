@@ -127,7 +127,7 @@ function SidebarContent({
 }) {
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between px-4 py-4 border-b border-border/40 flex-shrink-0">
+      <div className="flex  items-center justify-between px-4 py-4 border-b border-border/40 flex-shrink-0">
         <div className="flex items-center gap-2">
           <div className="h-6 w-6 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center">
             <MessageSquare className="h-3.5 w-3.5 text-primary" />
@@ -139,7 +139,7 @@ function SidebarContent({
         </button>
       </div>
 
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 ">
         <div className="px-2 py-2 space-y-0.5">
           {loadingSessions ? (
             <div className="flex items-center justify-center py-8"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div>
@@ -223,7 +223,7 @@ export default function ChatPage() {
       const res = await fetch(`${BASE_URL}/api/ai/sessions/${sessionId}/messages`, { credentials: "include" });
       if (!res.ok) return;
       const data = await res.json();
-      setMessages((data.messages ?? []).map((m: any) => ({ role: m.role, content: m.content })));
+      setMessages((data.messages ?? []).map((m) => ({ role: m.role, content: m.content })));
       setActiveSessionId(sessionId);
     } catch { toast.error("Failed to load conversation"); }
   };
@@ -394,7 +394,7 @@ export default function ChatPage() {
       <div className="flex h-[calc(100vh-3.5rem)] overflow-hidden">
 
         {/* Desktop sidebar */}
-        <div className="hidden lg:flex w-64 flex-shrink-0 border-r border-border/40 h-full">
+        <div className="hidden lg:flex  flex-shrink-0 border-r border-border/40 h-full">
           <SidebarContent
             sessions={sessions} activeSessionId={activeSessionId} isPro={isPro}
             loadingSessions={loadingSessions} onNewChat={handleNewChat}
@@ -456,15 +456,16 @@ export default function ChatPage() {
 
             <div className="flex items-center gap-2 flex-shrink-0">
               <button
-                onClick={handleNewChat}
-                className="hidden sm:flex items-center gap-1.5 h-8 px-3 rounded-lg border border-border/60 text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-              >
-                <Plus className="h-3.5 w-3.5" /> New chat
-              </button>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+  onClick={handleNewChat}
+  className="flex items-center justify-center h-8 w-8 sm:w-auto sm:px-3 rounded-lg border border-border/60 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+>
+  <Plus className="h-4 w-4" />
+  <span className="hidden sm:inline ml-1.5 text-xs">New chat</span>
+</button>
+              {/* <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                 <motion.div className="h-1.5 w-1.5 rounded-full bg-emerald-500" animate={{ scale: [1, 1.3, 1], opacity: [0.6, 1, 0.6] }} transition={{ duration: 2, repeat: Infinity }} />
                 <span className="text-[10px] font-medium text-emerald-400">Online</span>
-              </div>
+              </div> */}
             </div>
           </motion.div>
 
