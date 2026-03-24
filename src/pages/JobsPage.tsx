@@ -270,7 +270,7 @@ const JobsPage = () => {
         </motion.div>
 
         {/* Free plan nudge strip */}
-        {!isPro && <FreeUpgradeStrip />}
+        {/* {!isPro && <FreeUpgradeStrip />} */}
 
         {/* Filters */}
         <motion.div
@@ -539,74 +539,131 @@ const JobsPage = () => {
           </motion.div>
         )}
         {!isPro && (
-  <div className="mt-6 relative">
+  <div className="mt-10 space-y-6">
 
-    {/* 🔒 Overlay text */}
-    <div className="text-center mb-4">
-      <p className="text-sm text-muted-foreground">
-        🔒 more high-quality jobs  hidden
-      </p>
-      <p className="text-xs text-muted-foreground">
-        Upgrade to unlock personalized opportunities
+    {/* Header */}
+    <div className="text-center space-y-2">
+      <div className="inline-flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-xs font-medium px-3 py-1.5 rounded-full mb-2">
+        <Crown className="h-3.5 w-3.5" />
+        Pro Exclusive
+      </div>
+      <h3 className="text-lg font-bold text-foreground">
+        {jobs.length}+ more high-quality matches waiting
+      </h3>
+      <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+        Pro users see <span className="text-primary font-medium">3× more jobs</span> with higher match scores — tailored to your exact skills.
       </p>
     </div>
 
-    {/* 👇 SAME CARD STRUCTURE */}
+    {/* Blurred cards grid */}
     <div className="grid md:grid-cols-2 gap-4 relative">
-
-      {[1,2,3,4].map((i) => (
+      {[
+        { title: "Frontend Developer", match: 94, location: "Bangalore · Remote",   exp: "2–4 yrs", level: "mid",    skills: ["React", "TypeScript"], missing: ["GraphQL"],  timeText: "2h ago"  },
+        { title: "SDE-1 React",        match: 91, location: "Hyderabad · Hybrid",   exp: "1–3 yrs", level: "entry",  skills: ["React", "Redux"],     missing: ["Node.js"],   timeText: "5h ago"  },
+        { title: "UI Engineer",        match: 88, location: "Mumbai · On-site",     exp: "0–2 yrs", level: "entry",  skills: ["JavaScript", "CSS"],  missing: ["Next.js"],   timeText: "1d ago"  },
+        { title: "React Developer",    match: 85, location: "Bangalore · Remote",   exp: "2–5 yrs", level: "senior", skills: ["React", "REST APIs"], missing: ["AWS"],       timeText: "1d ago"  },
+      ].map((fakeJob, i) => (
         <div key={i} className="relative">
 
-          {/* 🔥 BLURRED REAL CARD */}
-          <div className="opacity-70 blur-[2px] pointer-events-none">
-            <Card className="card-hover border border-white/20 h-full flex flex-col">
+          {/* Blurred card — mirrors real card structure exactly */}
+          <div className="blur-[3px] opacity-60 pointer-events-none select-none">
+            <Card className="border border-white/20 h-full flex flex-col">
               <CardContent className="p-5 flex flex-col gap-4 h-full">
 
-                {/* Top */}
-                <div className="flex justify-between">
-                  <div>
-                    <div className="flex gap-2 mb-1">
-                      <span className="text-xs px-2 py-0.5 rounded border bg-primary/10 text-primary">entry</span>
-                      <span className="text-xs px-2 py-0.5 rounded border">foundit</span>
+                {/* Top row */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <span className={`text-xs px-2 py-0.5 rounded-full border font-medium capitalize ${levelConfig[fakeJob.level as keyof typeof levelConfig] ?? levelConfig.mid}`}>
+                        {fakeJob.level}
+                      </span>
+                      <span className="text-xs px-2 py-0.5 rounded border font-medium bg-accent/10 text-accent border-accent/20">
+                        foundit
+                      </span>
+                      <span className="text-xs px-2 py-0.5 rounded-full border font-medium bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+                        New
+                      </span>
                     </div>
-                    <div className="h-4 w-40 bg-muted rounded mb-2" />
-                    <div className="h-3 w-28 bg-muted rounded" />
+                    <h3 className="font-semibold text-foreground text-sm leading-snug mt-1">
+                      {fakeJob.title}
+                    </h3>
+                    {/* Company name deliberately blurred further */}
+                    <div className="flex items-center gap-1 mt-1">
+                      <Building2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                      <span className="text-muted-foreground text-sm blur-[6px] select-none">
+                        ██████████
+                      </span>
+                    </div>
                   </div>
 
-                  {/* fake match ring */}
-                  <div className="h-10 w-10 rounded-full border border-muted flex items-center justify-center text-xs">
-                    92%
+                  {/* Match ring */}
+                  <div className="shrink-0 flex flex-col items-center">
+                    <div className="relative h-14 w-14">
+                      <svg className="h-14 w-14 -rotate-90" viewBox="0 0 48 48">
+                        <circle cx="24" cy="24" r="20" fill="none" stroke="hsl(var(--border))" strokeWidth="4" />
+                        <circle
+                          cx="24" cy="24" r="20" fill="none"
+                          stroke={fakeJob.match >= 90 ? "hsl(142 70% 50%)" : "hsl(var(--primary))"}
+                          strokeWidth="4"
+                          strokeDasharray={`${(fakeJob.match / 100) * 125.6} 125.6`}
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-primary">
+                        {fakeJob.match}%
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground mt-0.5">match</span>
                   </div>
                 </div>
 
                 {/* Meta */}
-                <div className="flex gap-3 text-xs">
-                  <div className="h-3 w-20 bg-muted rounded" />
-                  <div className="h-3 w-16 bg-muted rounded" />
+                <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <MapPin className="h-3.5 w-3.5 text-primary" />{fakeJob.location}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Briefcase className="h-3.5 w-3.5 text-primary" />{fakeJob.exp}
+                  </span>
+                  <span className="ml-auto">{fakeJob.timeText}</span>
                 </div>
 
                 {/* Skills */}
-                <div className="flex gap-2 flex-wrap">
-                  {[1,2,3].map(s => (
-                    <div key={s} className="h-5 w-16 bg-muted rounded-full" />
-                  ))}
+                <div>
+                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
+                    Skills ({fakeJob.skills.length}/{fakeJob.skills.length + fakeJob.missing.length} matched)
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {fakeJob.skills.map((skill) => (
+                      <span key={skill} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-primary/10 text-primary border border-primary/20 capitalize">
+                        <CheckCircle className="h-2.5 w-2.5" />{skill}
+                      </span>
+                    ))}
+                    {fakeJob.missing.map((skill) => (
+                      <span key={skill} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-muted text-muted-foreground border border-border capitalize">
+                        <AlertCircle className="h-2.5 w-2.5" />{skill}
+                      </span>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Footer */}
-                <div className="flex justify-between mt-auto">
-                  <div className="h-6 w-20 bg-muted rounded" />
-                  <div className="h-8 w-16 bg-muted rounded" />
+                <div className="flex items-center justify-between mt-auto pt-2 border-t border-border">
+                  <Badge variant="secondary" className="text-xs">Frontend</Badge>
+                  <Button variant="hero" size="sm" className="gap-1.5 text-xs h-8 opacity-50">
+                    Apply <ExternalLink className="h-3 w-3" />
+                  </Button>
                 </div>
 
               </CardContent>
             </Card>
           </div>
 
-          {/* 🔥 LOCK OVERLAY */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs text-white flex items-center gap-1">
-              <Lock className="h-3 w-3" />
-              Locked
+          {/* Lock pill overlay */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="bg-background/80 backdrop-blur-sm border border-white/20 shadow-lg px-4 py-2 rounded-full text-xs text-foreground flex items-center gap-1.5 font-medium">
+              <Lock className="h-3.5 w-3.5 text-primary" />
+              Unlock to view
             </div>
           </div>
 
@@ -615,12 +672,15 @@ const JobsPage = () => {
     </div>
 
     {/* CTA */}
-    <div className="flex justify-center mt-6">
+    <div className="flex flex-col items-center gap-2 pt-2">
       <Link to="/pricing">
-        <Button variant="hero" className="px-6">
-          🔥 Unlock All Matches
+        <Button variant="hero" className="px-8 h-11 text-sm gap-2">
+          <Crown className="h-4 w-4" />
+          Unlock All {jobs.length}+ Matches · ₹99/mo
+          <ArrowRight className="h-4 w-4" />
         </Button>
       </Link>
+      <p className="text-xs text-muted-foreground">Cancel anytime · Instant access · No hidden fees</p>
     </div>
 
   </div>

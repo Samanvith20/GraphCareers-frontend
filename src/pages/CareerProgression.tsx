@@ -448,9 +448,9 @@ const CareerProgressionPage = () => {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold">Career Progression</h1>
-            <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[13px] font-semibold uppercase tracking-wide text-primary">
+            {/* <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[13px] font-semibold uppercase tracking-wide text-primary">
               Beta
-            </span>
+            </span> */}
             {isPro && (
               <span className="rounded-full border border-yellow-500/30 bg-yellow-500/10 px-2 py-0.5 text-[12px] font-semibold text-yellow-400 flex items-center gap-1">
                 <Crown className="h-3 w-3" /> Pro
