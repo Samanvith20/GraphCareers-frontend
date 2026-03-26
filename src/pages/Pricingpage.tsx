@@ -30,9 +30,9 @@ period: "",
 description: "Start exploring your career with powerful AI tools — no payment needed.",
 features: [
 "🎁 Get 10 free credits to try everything",
-"Top 10 job matches/day",
+"Unlimited job matches",
 "Basic career roadmap",
-"Track up to 50 applications",
+"Unlimited job tracking",
 "AI career coach (pay per use with credits)",
 "Resume analysis (pay per use with credits)",
 ],
@@ -65,13 +65,13 @@ popular: true,
 
 const comparisonRows = [
 ["Credits", "🎁 10 free credits", "💎 100 credits/month"],
-["Job Matches", "10/day", "Unlimited"],
+["Job Matches", "Unlimited", "Unlimited"],
 ["AI Career Coach", "Uses credits", "Uses credits"],
 ["Resume Analysis", "Uses credits", "Uses credits"],
 ["Career Roadmap", "Basic", "Full + Salary Data"],
 ["Skill Gap Insights", "Limited", "Advanced"],
-["Job Tracking", "Up to 50", "Unlimited"],
-["Priority Job Ranking", "—", "✔"],
+["Job Tracking", "Unlimited", "Unlimited"],
+// ["Priority Job Ranking", "—", "✔"],
 ];
 
 const faqs = [

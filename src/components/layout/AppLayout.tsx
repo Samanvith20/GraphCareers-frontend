@@ -79,12 +79,12 @@ const AppLayout = ({ children }) => {
 
           {/* Right side */}
           <div className="flex items-center gap-3">
-            <Link to="/" className="hidden sm:flex">
+            {/* <Link to="/" className="hidden sm:flex">
               <Button variant="ghost" size="sm" className="gap-1.5 text-xs text-muted-foreground">
                 <Home className="h-3.5 w-3.5" />
                 Landing
               </Button>
-            </Link>
+            </Link> */}
             <Link to="/profile">
               <Avatar className="h-8 w-8 border border-border cursor-pointer hover:border-primary/50 transition-colors">
                 <AvatarFallback className="text-xs font-bold bg-primary/20 text-primary">{initials}</AvatarFallback>
