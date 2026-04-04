@@ -99,7 +99,7 @@ function calculateLevel(minExp: number | null) {
 const FreeUpgradeStrip = () => (
   <Link to="/pricing">
     <div className="flex items-center justify-between gap-3 mt-6 rounded-xl border border-primary/25 bg-primary/5 px-4 py-3 cursor-pointer hover:bg-primary/10 transition-colors">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
         <Lock className="h-3.5 w-3.5 text-primary shrink-0" />
         <p className="text-xs text-muted-foreground">
   You're on the <span className="text-foreground font-medium">Free plan</span>. Upgrade now to unlock unlimited matches.
@@ -249,7 +249,7 @@ const JobsPage = () => {
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               <Badge variant="glow" className="gap-1.5 px-3 py-1">
                 <Star className="h-3.5 w-3.5 text-primary" />
                 Avg {avgMatch}% match
@@ -277,7 +277,7 @@ const JobsPage = () => {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
-          className="flex flex-wrap items-center gap-3"
+          className="grid grid-cols-1 sm:grid-cols-2 md:flex md:flex-wrap items-stretch gap-3"
         >
           <div className="relative flex-1 min-w-[260px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -290,7 +290,7 @@ const JobsPage = () => {
           </div>
 
           <Select value={selectedRole} onValueChange={setSelectedRole}>
-            <SelectTrigger className="h-10 w-[180px]"><SelectValue placeholder="Role" /></SelectTrigger>
+            <SelectTrigger className="h-10 w-full sm:w-auto"><SelectValue placeholder="Role" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Roles</SelectItem>
               {roles.map((role, i) => <SelectItem key={i} value={role}>{role}</SelectItem>)}
@@ -298,7 +298,7 @@ const JobsPage = () => {
           </Select>
 
           <Select value={selectedWorkMode} onValueChange={setSelectedWorkMode}>
-            <SelectTrigger className="h-10 w-[130px]"><SelectValue placeholder="All Modes" /></SelectTrigger>
+            <SelectTrigger className="h-10 w-full sm:w-auto"><SelectValue placeholder="All Modes" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Modes</SelectItem>
               <SelectItem value="Remote">Remote</SelectItem>
@@ -308,7 +308,7 @@ const JobsPage = () => {
           </Select>
 
           <Select value={selectedExpRange} onValueChange={setSelectedExpRange}>
-            <SelectTrigger className="h-10 w-[140px]"><SelectValue placeholder="Experience" /></SelectTrigger>
+            <SelectTrigger className="h-10 w-full sm:w-auto"><SelectValue placeholder="Experience" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Levels</SelectItem>
               <SelectItem value="entry">Entry (0–2 yrs)</SelectItem>
@@ -328,7 +328,7 @@ const JobsPage = () => {
             </SelectContent>
           </Select> */}
           <Select value={selectedDate} onValueChange={setSelectedDate}>
-  <SelectTrigger className="h-10 w-[140px]">
+  <SelectTrigger className="h-10 w-full sm:w-auto">
     <SelectValue placeholder="Date" />
   </SelectTrigger>
   <SelectContent>
@@ -353,7 +353,7 @@ const JobsPage = () => {
         </p>
 
         {/* Grid */}
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <AnimatePresence mode="popLayout">
             {filtered.map((job, i) => {
               const level         = calculateLevel(job.minExp);
@@ -373,7 +373,7 @@ const JobsPage = () => {
                     <CardContent className="p-5 flex flex-col gap-4 h-full">
 
                       {/* Top row */}
-                      <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start justify-between gap-3 flex-wrap sm:flex-nowrap">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap mb-1">
                             <span className={`text-xs px-2 py-0.5 rounded-full border font-medium capitalize ${levelConfig[level] ?? levelConfig.mid}`}>
@@ -396,9 +396,9 @@ const JobsPage = () => {
                             <span className="text-muted-foreground text-sm truncate">{job.company}</span>
                           </div>
                         </div>
-
+                 
                         {/* Match ring */}
-                        <div className="shrink-0 flex flex-col items-center">
+                       <div className="flex flex-col items-center shrink-0 sm:shrink-0">
                           <div className="relative h-14 w-14">
                             <svg className="h-14 w-14 -rotate-90" viewBox="0 0 48 48">
                               <circle cx="24" cy="24" r="20" fill="none" stroke="hsl(var(--border))" strokeWidth="4" />
@@ -473,7 +473,7 @@ const JobsPage = () => {
                           })()}
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                           <Select
                             value={currentStatus}
                             disabled={upsertStatus.isPending}

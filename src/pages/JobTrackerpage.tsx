@@ -66,7 +66,6 @@ const sourceColors = {
   naukri: "bg-secondary text-secondary-foreground border-border",
   foundit: "bg-accent/10 text-accent border-accent/20",
 };
-
 const statuses = [
   "all",
   
@@ -167,7 +166,7 @@ const summaryStats = [
 
   return (
     <AppLayout>
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+      <div className="max-w-5xl mx-auto px-3 sm:px-6 py-6 sm:py-8 space-y-6">
         {/* Page header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -200,7 +199,7 @@ const summaryStats = [
         </motion.div>
 
         {/* Summary stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {summaryStats.map(({ label, value, icon: Icon, color }, i) => (
             <motion.div
               key={label}
@@ -227,8 +226,10 @@ const summaryStats = [
         {/* Tabs + Job Cards */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex items-center gap-3 flex-wrap">
-            <Filter className="h-4 w-4 text-muted-foreground" />
-            <TabsList className="bg-secondary">
+            <Filter  onClick={() => setActiveTab("all")}
+            className="h-4 w-4 text-muted-foreground" />
+           <div className="w-full overflow-x-auto">
+  <TabsList className="bg-secondary flex w-max min-w-full sm:w-auto">
               {statuses.map((s) => (
                 <TabsTrigger
                   key={s}
@@ -242,6 +243,7 @@ const summaryStats = [
                 </TabsTrigger>
               ))}
             </TabsList>
+            </div>
           </div>
 
           {statuses.map((s) => (
@@ -270,10 +272,10 @@ const summaryStats = [
                     >
                       <Card className="card-hover group">
                         <CardContent className="p-5">
-                          <div className="flex items-start justify-between gap-4">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap mb-1">
-                                <h3 className="font-semibold text-foreground text-sm leading-snug truncate">
+                                <h3 className="font-semibold text-foreground text-sm leading-snug break-words line-clamp-2">
                                   {job.jobTitle}
                                 </h3>
                                 <span
@@ -306,14 +308,14 @@ const summaryStats = [
     <p className="text-xs text-muted-foreground font-medium mb-0.5">
       Notes
     </p>
-    <p className="text-sm text-foreground leading-snug line-clamp-3">
+    <p className="text-sm text-foreground leading-snug break-words line-clamp-3">
       {job.notes}
     </p>
   </div>
 )}
 
                             </div>
-                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                               <a
                                 href={job.jobUrl}
                                 target="_blank"
@@ -350,7 +352,31 @@ const summaryStats = [
                   );
                 })}
               </AnimatePresence>
+                 {filtered.length === 0 && jobs.length > 0 && (
+  <motion.div
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="flex flex-col items-center justify-center py-16 text-center"
+  >
+    <Filter className="h-10 w-10 text-muted-foreground opacity-40 mb-3" />
 
+    <h3 className="text-lg font-semibold text-foreground mb-1">
+      No results found
+    </h3>
+
+    <p className="text-sm text-muted-foreground max-w-sm mb-4">
+      No jobs match this filter. Try changing filters or clearing them.
+    </p>
+
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={() => setActiveTab("all")}
+    >
+      Clear Filters
+    </Button>
+  </motion.div>
+)}
               {jobs.length === 0 && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
