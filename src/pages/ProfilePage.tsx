@@ -41,22 +41,20 @@ import ErrorPage from "./ErrorPage";
 
 const ProfilePage = () => {
   // All hooks must be called at the top of the component
-  
+
   //console.log("userData:;",userData)
-  
+
   const updateProfile = useUpdateProfile();
   const uploadResume = useUploadResume();
-  type ResumeStatus =
-    | "idle"
-    | "uploading"
-    | "parsing"
-    | "completed"
-    | "error";
+  type ResumeStatus = "idle" | "uploading" | "parsing" | "completed" | "error";
 
   const [resumeStatus, setResumeStatus] = useState<ResumeStatus>("idle");
- //console.log("resumestatus:;",resumeStatus)
-    const { data: userData, isLoading, isError } = useProfile(resumeStatus==="parsing");
-
+  //console.log("resumestatus:;",resumeStatus)
+  const {
+    data: userData,
+    isLoading,
+    isError,
+  } = useProfile(resumeStatus === "parsing");
 
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
@@ -71,8 +69,7 @@ const ProfilePage = () => {
   const [newSkill, setNewSkill] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
 
-  const queryClient=useQueryClient()
-  
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!userData) return;
@@ -87,24 +84,23 @@ const ProfilePage = () => {
   }, [userData]);
 
   useEffect(() => {
-  if (resumeStatus !== "parsing") return;
+    if (resumeStatus !== "parsing") return;
 
-  const status = userData?.resume?.status;
+    const status = userData?.resume?.status;
 
-  if (status === "completed") {
-    setResumeStatus("completed");
-    toast.success("Resume processed and profile updated 🎉");
-  }
+    if (status === "completed") {
+      setResumeStatus("completed");
+      toast.success("Resume processed and profile updated 🎉");
+    }
 
-  if (status === "failed") {
-    setResumeStatus("error");
-    toast.error(
-      userData?.resume?.errorMessage ||
-      "Resume parsing failed. Please upload another file (or) try after sometime."
-    );
-  }
-
-}, [userData?.resume?.status]);
+    if (status === "failed") {
+      setResumeStatus("error");
+      toast.error(
+        userData?.resume?.errorMessage ||
+          "Resume parsing failed. Please upload another file (or) try after sometime.",
+      );
+    }
+  }, [userData?.resume?.status]);
   if (isLoading) {
     return (
       <AppLayout>
@@ -140,9 +136,9 @@ const ProfilePage = () => {
       icon: Globe,
     },
     {
-      label:"Credits",
-      value:userData.credits ?? 0,
-      icon:Coins
+      label: "Credits",
+      value: userData.credits ?? 0,
+      icon: Coins,
     },
   ];
 
@@ -153,66 +149,62 @@ const ProfilePage = () => {
     userData?.role,
   ];
 
-    const handleSave = () => {
-  const updatedFields: Record<string, any> = {};
+  const handleSave = () => {
+    const updatedFields: Record<string, any> = {};
 
-  // primitives
-  if (form.name !== userData.name) updatedFields.name = form.name;
-  if (form.bio !== userData.bio) updatedFields.bio = form.bio;
-  if (form.location !== userData.location)
-    updatedFields.location = form.location;
-  if (form.experience !== userData.experience)
-    updatedFields.experience = form.experience;
-  if (form.role !== userData.role) updatedFields.role = form.role;
+    // primitives
+    if (form.name !== userData.name) updatedFields.name = form.name;
+    if (form.bio !== userData.bio) updatedFields.bio = form.bio;
+    if (form.location !== userData.location)
+      updatedFields.location = form.location;
+    if (form.experience !== userData.experience)
+      updatedFields.experience = form.experience;
+    if (form.role !== userData.role) updatedFields.role = form.role;
 
-  // ✅ skills: REPLACE semantics
-  if (
-    JSON.stringify(form.skills) !== JSON.stringify(userData.skills)
-  ) {
-    updatedFields.skills = form.skills; // can be []
-  }
+    // ✅ skills: REPLACE semantics
+    if (JSON.stringify(form.skills) !== JSON.stringify(userData.skills)) {
+      updatedFields.skills = form.skills; // can be []
+    }
 
-  if (Object.keys(updatedFields).length === 0) {
-    setEditing(false);
-    return;
-  }
-
-  updateProfile.mutate(updatedFields, {
-    onSuccess: () => {
+    if (Object.keys(updatedFields).length === 0) {
       setEditing(false);
-      toast.success("Profile updated successfully");
-    },
-    onError: () => {
-      toast.error("Failed to update profile");
-    },
-  });
-};
-  const isBusy =
-    resumeStatus === "uploading" ||
-    resumeStatus === "parsing";
-  
-    const handleResumeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
+      return;
+    }
 
-  e.target.value = "";
-  setResumeFile(file);
-  setResumeStatus("uploading");
-  uploadResume.reset();
+    updateProfile.mutate(updatedFields, {
+      onSuccess: () => {
+        setEditing(false);
+        toast.success("Profile updated successfully");
+      },
+      onError: () => {
+        toast.error("Failed to update profile");
+      },
+    });
+  };
+  const isBusy = resumeStatus === "uploading" || resumeStatus === "parsing";
 
-  // ✅ Use mutate with callbacks — no Promise to get stuck on
-  uploadResume.mutate(file, {
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
-      setResumeStatus("parsing");
-      toast.info("Parsing resume...");
-    },
-    onError: (err: any) => {
-      setResumeStatus("idle");
-      toast.error(err.message || "Resume processing failed");
-    },
-  });
-};
+  const handleResumeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    e.target.value = "";
+    setResumeFile(file);
+    setResumeStatus("uploading");
+    uploadResume.reset();
+
+    // ✅ Use mutate with callbacks — no Promise to get stuck on
+    uploadResume.mutate(file, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["profile"] });
+        setResumeStatus("parsing");
+        toast.info("Parsing resume...");
+      },
+      onError: (err: any) => {
+        setResumeStatus("idle");
+        toast.error(err.message || "Resume processing failed");
+      },
+    });
+  };
   const filledBasicInfo = basicInfoFields.filter(Boolean).length;
   const totalBasicInfo = basicInfoFields.length;
 
@@ -226,7 +218,6 @@ const ProfilePage = () => {
     bio: userData.bio.length >= 50 ? 100 : 0,
   };
 
- 
   const profileStrengthItems = [
     { label: "Basic Info", pct: profileCompletion.basicInfo },
     { label: "Experience Added", pct: profileCompletion.experience },
@@ -305,8 +296,7 @@ const ProfilePage = () => {
           initial="hidden"
           animate="visible"
         >
-            <Card className="border border-white/20">
-        
+          <Card className="border border-white/20">
             <div className="h-28 bg-gradient-to-r from-primary/20 via-accent/10 to-primary/5 relative">
               <div className="absolute inset-0 bg-grid opacity-20" />
             </div>
@@ -475,8 +465,7 @@ const ProfilePage = () => {
               initial="hidden"
               animate="visible"
             >
-            <Card className="border border-white/20">
-           
+              <Card className="border border-white/20">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                     Overview
@@ -507,22 +496,19 @@ const ProfilePage = () => {
               initial="hidden"
               animate="visible"
             >
-            <Card className="border border-white/20">
-            
+              <Card className="border border-white/20">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                     Resume
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  
-
                   <label
                     htmlFor="resume-upload"
                     className="flex flex-col items-center gap-2 border border-dashed border-white/15
 hover:border-white/30 rounded-lg p-5 cursor-pointer transition-colors"
                   >
-                    {resumeStatus === "idle" && !userData.resume.parsed  && (
+                    {resumeStatus === "idle" && !userData.resume.parsed && (
                       <>
                         <Upload className="h-8 w-8 text-muted-foreground" />
                         <p className="text-sm font-medium">
@@ -582,11 +568,11 @@ hover:border-white/30 rounded-lg p-5 cursor-pointer transition-colors"
                       <>
                         <FileText className="h-8 w-8 text-primary" />
                         <p
-  className="text-sm font-medium max-w-full truncate"
-  title={userData.resume.fileName}
->
-  {userData.resume.fileName}
-</p>
+                          className="text-sm font-medium max-w-full truncate"
+                          title={userData.resume.fileName}
+                        >
+                          {userData.resume.fileName}
+                        </p>
                         <p className="text-xs text-muted-foreground">
                           Uploaded on{" "}
                           {new Date(
@@ -599,10 +585,11 @@ hover:border-white/30 rounded-lg p-5 cursor-pointer transition-colors"
                             ✓ Resume processed
                           </p>
                         )}
-                         {/* 👇 Important helper text */}
-    <p className="text-xs text-muted-foreground mt-1">
-      Details may not be 100% accurate. Please review and update if needed.
-    </p>
+                        {/* 👇 Important helper text */}
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Details may not be 100% accurate. Please review and
+                          update if needed.
+                        </p>
 
                         <Button
                           variant="outline"
@@ -617,10 +604,10 @@ hover:border-white/30 rounded-lg p-5 cursor-pointer transition-colors"
                       </>
                     )}
                     {resumeStatus === "error" && (
-  <Button onClick={() => setResumeStatus("idle")}>
-    Upload again
-  </Button>
-)}
+                      <Button onClick={() => setResumeStatus("idle")}>
+                        Upload again
+                      </Button>
+                    )}
 
                     <input
                       id="resume-upload"
@@ -634,7 +621,6 @@ hover:border-white/30 rounded-lg p-5 cursor-pointer transition-colors"
                       }
                     />
                   </label>
-                  
                 </CardContent>
               </Card>
             </motion.div>
@@ -645,8 +631,7 @@ hover:border-white/30 rounded-lg p-5 cursor-pointer transition-colors"
               initial="hidden"
               animate="visible"
             >
-            <Card className="border border-white/20">
-          
+              <Card className="border border-white/20">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                     Profile Strength
@@ -676,8 +661,7 @@ hover:border-white/30 rounded-lg p-5 cursor-pointer transition-colors"
           {/* Right column */}
           <div className="lg:col-span-2 space-y-6">
             {userData.skills.length === 0 && !userData.bio && (
-            <Card className="border border-white/20">
-           
+              <Card className="border border-white/20">
                 <CardContent className="p-6 text-center flex flex-col items-center">
                   <p className="text-lg text-primary font-semibold mb-2">
                     🚀 Welcome! Let's build your profile
@@ -703,8 +687,7 @@ hover:border-white/30 rounded-lg p-5 cursor-pointer transition-colors"
               initial="hidden"
               animate="visible"
             >
-            <Card className="border border-white/20">
-              
+              <Card className="border border-white/20">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
                     <User className="h-4 w-4 text-primary" />
@@ -735,7 +718,7 @@ hover:border-white/30 rounded-lg p-5 cursor-pointer transition-colors"
               initial="hidden"
               animate="visible"
             >
-            <Card className="border border-white/20">
+              <Card className="border border-white/20">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
                     <Star className="h-4 w-4 text-primary" />

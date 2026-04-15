@@ -36,6 +36,8 @@ import { Link } from "react-router-dom";
 import { useUserJobApplications } from "@/hooks/useUserjobapplications";
 import { useUpsertJobStatus } from "@/hooks/useUpdateJobStatus";
 import { toast } from "sonner";
+import { ResumeScoreModal }    from "@/components/resume/ResumeScoreModal";
+import { ResumeOptimizeModal } from "@/components/resume/ResumeOptimizeModal";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -122,6 +124,8 @@ const JobsPage = () => {
   const [selectedRole,     setSelectedRole]     = useState("all");
   const [selectedStatus,   setSelectedStatus]   = useState("all");
   const [selectedDate, setSelectedDate]         = useState("all");
+  const [scoreModalJob,    setScoreModalJob]    = useState<{ jobSourceId: string; title: string; company: string } | null>(null);
+const [optimizeModalJob, setOptimizeModalJob] = useState<{ jobSourceId: string; title: string; company: string } | null>(null);
 
   const { data: profile }              = useProfile();
   const { data: jobApplications = [] } = useUserJobApplications();
@@ -474,50 +478,50 @@ const JobsPage = () => {
                         </div>
 
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                          <Select
-                            value={currentStatus}
-                            disabled={upsertStatus.isPending}
-                            onValueChange={(val) => {
-                              if (val === "none") return;
-                              upsertStatus.mutate(
-                                {
-                                  jobUrl:   job.url,
-                                  jobTitle: job.title,
-                                  company:  job.company,
-                                  source:   job.source,
-                                  status:   val as JobStatus,
-                                  notes:    job.notes,
-                                },
-                                {
-                                  onSuccess: () => toast.success(`Marked as ${val}`),
-                                  onError:   () => toast.error("Failed to update. Try again."),
-                                },
-                              );
-                            }}
-                          >
-                            <SelectTrigger className="h-8 flex-1 min-w-0 text-xs gap-1 bg-secondary border-border">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none">Track this job</SelectItem>
-                              <SelectItem value="saved">
-                                <span className="flex items-center gap-1.5"><Bookmark className="h-3 w-3" />Saved</span>
-                              </SelectItem>
-                              <SelectItem value="applied">
-                                <span className="flex items-center gap-1.5"><Send className="h-3 w-3" />Applied</span>
-                              </SelectItem>
-                              <SelectItem value="ignored">
-                                <span className="flex items-center gap-1.5"><EyeOff className="h-3 w-3" />Ignored</span>
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-
-                          <a href={job.url} target="_blank" rel="noopener noreferrer" className="shrink-0">
-                            <Button variant="hero" size="sm" className="gap-1.5 text-xs h-8">
-                              Apply <ExternalLink className="h-3 w-3" />
-                            </Button>
-                          </a>
-                        </div>
+  {/* Track status select — unchanged */}
+  <Select
+    value={currentStatus}
+    disabled={upsertStatus.isPending}
+    onValueChange={(val) => {
+      if (val === "none") return;
+      upsertStatus.mutate(
+        { jobUrl: job.url, jobTitle: job.title, company: job.company, source: job.source, status: val as JobStatus, notes: job.notes },
+        { onSuccess: () => toast.success(`Marked as ${val}`), onError: () => toast.error("Failed to update. Try again.") }
+      );
+    }}
+  >
+    <SelectTrigger className="h-8 flex-1 min-w-0 text-xs gap-1 bg-secondary border-border">
+      <SelectValue />
+    </SelectTrigger>
+    <SelectContent>
+      <SelectItem value="none">Track this job</SelectItem>
+      <SelectItem value="saved"><span className="flex items-center gap-1.5"><Bookmark className="h-3 w-3" />Saved</span></SelectItem>
+      <SelectItem value="applied"><span className="flex items-center gap-1.5"><Send className="h-3 w-3" />Applied</span></SelectItem>
+      <SelectItem value="ignored"><span className="flex items-center gap-1.5"><EyeOff className="h-3 w-3" />Ignored</span></SelectItem>
+    </SelectContent>
+  </Select>
+ 
+  {/* NEW: ATS Score check button */}
+  {/* <Button
+    variant="outline"
+    size="sm"
+    className="gap-1.5 text-xs h-8 shrink-0"
+    onClick={() => setScoreModalJob({
+      jobSourceId: job.id,   // ← the Neo4j string ID, NOT job.id
+      title:       job.title,
+      company:     job.company ?? "",
+    })}
+  >
+    Check Score
+  </Button> */}
+ 
+  {/* Apply — unchanged */}
+  <a href={job.url} target="_blank" rel="noopener noreferrer" className="shrink-0">
+    <Button variant="hero" size="sm" className="gap-1.5 text-xs h-8">
+      Apply <ExternalLink className="h-3 w-3" />
+    </Button>
+  </a>
+</div>
                       </div>
 
                     </CardContent>
@@ -541,6 +545,31 @@ const JobsPage = () => {
         
 
       </div>
+      {scoreModalJob && (
+  <ResumeScoreModal
+    open
+    jobSourceId={scoreModalJob.jobSourceId}
+    jobTitle={scoreModalJob.title}
+    company={scoreModalJob.company}
+    onClose={() => setScoreModalJob(null)}
+    onOptimize={() => {
+      setOptimizeModalJob(scoreModalJob);
+      setScoreModalJob(null);
+    }}
+  />
+)}
+ 
+{optimizeModalJob && (
+  <ResumeOptimizeModal
+    open
+    jobSourceId={optimizeModalJob.jobSourceId}
+    jobTitle={optimizeModalJob.title}
+    company={optimizeModalJob.company}
+    userCredits={profile?.credits ?? 0}
+    onClose={() => setOptimizeModalJob(null)}
+  />
+)}
+
     </AppLayout>
   );
 };

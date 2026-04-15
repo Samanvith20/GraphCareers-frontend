@@ -133,7 +133,7 @@ function DetailPanel({ role, isPro }: { role: CareerRole; isPro: boolean }) {
 
       {/* Salary — pro only */}
       <p className="mt-1 text-sm text-muted-foreground">
-        {isPro && role.salary
+        { role?.salary
           ? `${role.salary} · `
           : ""}
         {role.companies.length} companies hiring
@@ -163,21 +163,17 @@ function DetailPanel({ role, isPro }: { role: CareerRole; isPro: boolean }) {
           <p className="mb-2 text-xs font-extrabold uppercase tracking-wide text-amber-400">
             Skills to learn
           </p>
-          {isPro ? (
-            <div className="flex flex-wrap gap-2">
-              {role.missingSkills.length ? (
-                role.missingSkills.map((s) => (
-                  <span key={s} className="rounded-full border border-amber-500/30 px-3 py-1 text-xs capitalize text-amber-400">
-                    {s}
-                  </span>
-                ))
-              ) : (
-                <span className="text-xs text-emerald-400">Fully qualified</span>
-              )}
-            </div>
-          ) : (
-            <LockedSkills label="skills to learn" />
-          )}
+          <div className="flex flex-wrap gap-2">
+    {
+      role.missingSkills.length>0 &&(
+        role.missingSkills.map((s) => (
+          <span key={s} className="rounded-full border border-amber-500/30 px-3 py-1 text-xs capitalize text-amber-400">
+            {s}
+          </span>
+        ))
+      )
+    }
+</div>
         </div>
       </div>
 
@@ -358,7 +354,7 @@ const CareerProgressionPage = () => {
   const careerPath: CareerRole[]       = data?.careerPath      ?? [];
   const progression: ProgressionRole | null = data?.progression ?? null;
   const lateralSwitches: LateralRole[] = data?.lateralSwitches ?? [];
-  const isPro: boolean                 = data?.isPro           ?? false;
+  const isPro: boolean                 = true;
 
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const containerRef                    = useRef<HTMLDivElement>(null);
@@ -451,11 +447,11 @@ const CareerProgressionPage = () => {
             {/* <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[13px] font-semibold uppercase tracking-wide text-primary">
               Beta
             </span> */}
-            {isPro && (
+            {/* {isPro && (
               <span className="rounded-full border border-yellow-500/30 bg-yellow-500/10 px-2 py-0.5 text-[12px] font-semibold text-yellow-400 flex items-center gap-1">
                 <Crown className="h-3 w-3" /> Pro
               </span>
-            )}
+            )} */}
           </div>
           <p className="text-sm text-muted-foreground mt-0.5">
             Click any role in the tree to explore details
@@ -518,14 +514,10 @@ const CareerProgressionPage = () => {
         </div>
 
         {/* ── Pro-only sections ────────────────────────────────────────── */}
-        {isPro ? (
-          <>
-            {progression && <ProgressionCard progression={progression} />}
-            {/* {lateralSwitches.length > 0 && <LateralSwitchCards lateralSwitches={lateralSwitches} />} */}
-          </>
-        ) : (
-          <ProNudge />
-        )}
+       <>
+  {progression && <ProgressionCard progression={progression} />}
+  
+</>
 
       </div>
     </AppLayout>
