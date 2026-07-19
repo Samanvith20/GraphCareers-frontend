@@ -479,7 +479,7 @@ const CareerProgressionPage = () => {
         )}
 
         {/* Tree + detail panel */}
-        <div className="grid gap-4 lg:grid-cols-[1fr_420px]">
+        <div className="grid gap-4 lg:grid-cols-[1fr_360px] xl:grid-cols-[1fr_420px]">
           <div ref={containerRef} className="min-h-[420px] overflow-x-auto rounded-2xl border border-border bg-background">
             {treeData && (
               <Tree

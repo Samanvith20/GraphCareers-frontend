@@ -71,7 +71,7 @@ const ForgotPasswordPage = () => {
           <p className="text-muted-foreground text-sm">Reset your password</p>
         </div>
 
-        <Card className="border-border/50">
+        <Card className="glass-card shadow-2xl border-border/20">
           <CardContent className="pt-6 space-y-5">
             {sent ? (
               <div className="text-center py-6 space-y-4">
@@ -94,7 +94,7 @@ const ForgotPasswordPage = () => {
                   <Label htmlFor="email" className="text-sm text-muted-foreground">Email</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-9" />
+                    <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10 h-11 bg-muted/50 border-border" />
                   </div>
                 </div>
 

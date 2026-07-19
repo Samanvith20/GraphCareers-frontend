@@ -22,7 +22,10 @@ export async function apiPost<T>(
   
 
   if (!res.ok) {
-    throw new Error(data.message || data.error|| "Request failed");
+    const errMsg = typeof data.error === 'object' && data.error !== null 
+      ? data.error.message || "Request failed" 
+      : data.message || data.error || "Request failed";
+    throw new Error(errMsg);
   }
 
   return data;

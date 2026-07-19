@@ -322,12 +322,7 @@ const ProfilePage = () => {
                         <h1 className="text-xl font-bold text-foreground">
                           {userData.name || "Unnamed User"}
                         </h1>
-                        <Badge
-                          variant="secondary"
-                          className="capitalize text-xs"
-                        >
-                          {userData.tier} plan
-                        </Badge>
+
                       </div>
                     )}
                     <div className="flex items-center gap-2 mt-1">

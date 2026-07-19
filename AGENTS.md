@@ -1,4 +1,4 @@
-﻿# GraphCareers — Frontend AGENTS.md
+# GraphCareers — Frontend AGENTS.md
 
 > **Single source of truth for AI coding agents.** Read this file completely before touching any code.
 
@@ -100,6 +100,7 @@ frontend/
 │   │   ├── CareerProgression.tsx    # react-d3-tree career graph (protected)
 │   │   ├── ChatPage.tsx             # Streaming AI chat (SSE / ReadableStream) (protected)
 │   │   ├── ProfilePage.tsx          # Profile editor + resume upload + polling (protected)
+│   │   ├── PlatformOptimizePage.tsx # Platform-specific resume optimizer (protected)
 │   │   ├── Pricingpage.tsx          # Razorpay-triggered pricing (public)
 │   │   ├── loginpage.tsx            # Login (public-only)
 │   │   ├── signuppage.tsx           # Signup (public-only)
@@ -189,6 +190,7 @@ frontend/
 | `/career` | `CareerProgressionPage` | 🔒 Protected | react-d3-tree graph |
 | `/chat` | `ChatPage` | 🔒 Protected | Streaming SSE chat |
 | `/profile` | `ProfilePage` | 🔒 Protected | Profile editor + resume upload |
+| `/platform-optimize` | `PlatformOptimizePage` | 🔒 Protected | Platform-specific resume optimization |
 | `/pricing` | `PricingPage` | Public | Razorpay payment trigger |
 | `/login` | `LoginPage` | Public-only | Redirects authed users away |
 | `/signup` | `SignupPage` | Public-only | Redirects authed users away |

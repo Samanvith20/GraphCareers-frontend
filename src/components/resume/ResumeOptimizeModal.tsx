@@ -363,13 +363,14 @@ export function ResumeOptimizeModal({
         setAnalyzeData(d);
 
         // If already optimized jump to step 3
-        if (d.alreadyOptimized && d.optimizedResume) {
+        if (d.alreadyOptimized && (d.optimizedResume || (d as any).optimizedJson)) {
+          const resPayload = d.optimizedResume || (d as any).optimizedJson;
           setOptimizeData({
             scoreBefore:       d.scoreBefore,
             scoreAfter:        d.scoreAfter ?? d.scoreBefore,
-            optimizedResume:   d.optimizedResume,
+            optimizedResume:   resPayload,
             keywordsAdded:     d.keywordsAdded,
-            optimizationNotes: d.optimizedResume.optimizationNotes ?? [],
+            optimizationNotes: resPayload.optimizationNotes ?? [],
           });
           setStep(3);
         }
@@ -385,14 +386,15 @@ export function ResumeOptimizeModal({
     setError(null);
     try {
       const r = await fetch(`${BASE_URL}/api/resume/optimize/${jobSourceId}`, { credentials: "include", method: "POST" });
-      const d = await r.json() as OptimizeResult & { error?: string; message?: string };
+      const d = await r.json() as OptimizeResult & { error?: string; message?: string; optimizedJson?: any };
       if (!r.ok) throw new Error(d.message ?? d.error ?? "Optimization failed");
+      const resPayload = d.optimizedResume || d.optimizedJson;
       setOptimizeData({
         scoreBefore:       d.scoreBefore,
         scoreAfter:        d.scoreAfter,
-        optimizedResume:   d.optimizedResume,
+        optimizedResume:   resPayload,
         keywordsAdded:     d.keywordsAdded ?? [],
-        optimizationNotes: d.optimizationNotes ?? d.optimizedResume?.optimizationNotes ?? [],
+        optimizationNotes: d.optimizationNotes ?? resPayload?.optimizationNotes ?? [],
       });
       setStep(3);
     } catch (e: unknown) {
@@ -437,9 +439,9 @@ export function ResumeOptimizeModal({
             onClick={onClose}
           />
 
-          {/* Drawer — UNCHANGED slide-in from right, 900px */}
+          {/* Drawer — slide-in from right, 1100px */}
           <motion.div
-            className="fixed top-0 right-0 z-50 h-full w-[900px] max-w-[90vw] bg-background border-l border-border/60 shadow-2xl flex flex-col"
+            className="fixed top-0 right-0 z-50 h-full w-[1100px] max-w-[95vw] bg-background border-l border-border/60 shadow-2xl flex flex-col"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
@@ -449,9 +451,6 @@ export function ResumeOptimizeModal({
             <div className="flex items-center justify-between px-8 pt-5 pb-3 border-b border-border sticky top-0 bg-background z-10 shrink-0">
               <div className="flex items-center gap-3">
                 <h2 className="font-semibold text-foreground">Generate Your Custom Resume</h2>
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                  {userCredits} credits available today
-                </span>
               </div>
               <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
                 <X className="h-4 w-4" />
@@ -544,10 +543,9 @@ export function ResumeOptimizeModal({
                         <Button
                           className="w-full bg-emerald-500 hover:bg-emerald-600 text-white gap-2"
                           onClick={runOptimize}
-                          disabled={userCredits < 1}
                         >
                           <Zap className="h-4 w-4" />
-                          {userCredits < 1 ? "No credits remaining — upgrade to continue" : "Improve My Resume for This Job (1 credit)"}
+                          Improve My Resume for This Job
                         </Button>
                       </>
                     ) : null}
@@ -595,33 +593,33 @@ export function ResumeOptimizeModal({
                 <div className="flex-1 flex overflow-hidden">
 
                   {/* LEFT — resume paper */}
-                  <div className="flex-1 flex flex-col overflow-hidden bg-gray-100 border-r border-border">
+                  <div className="flex-1 flex flex-col overflow-hidden bg-muted/40 border-r border-border relative">
 
                     {/* Toolbar */}
-                    <div className="flex items-center justify-between gap-3 px-4 py-2 bg-white border-b border-gray-200 shrink-0">
-                      <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
+                    <div className="flex items-center justify-between gap-3 px-6 py-3 bg-background/80 backdrop-blur-md border-b border-border shrink-0 z-10">
+                      <div className="flex items-center gap-1 bg-muted rounded-xl p-1 shadow-inner">
                         <button
                           onClick={() => setActivePanel("resume")}
-                          className={`text-xs px-3 py-1 rounded-md font-medium transition-colors
-                            ${activePanel === "resume" ? "bg-white text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                          className={`text-xs px-4 py-1.5 rounded-lg font-semibold transition-all duration-200
+                            ${activePanel === "resume" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-background/50"}`}
                         >
                           AI Rewrite
                         </button>
                         <button
                           onClick={() => setActivePanel("changes")}
-                          className={`text-xs px-3 py-1 rounded-md font-medium transition-colors
-                            ${activePanel === "changes" ? "bg-white text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                          className={`text-xs px-4 py-1.5 rounded-lg font-semibold transition-all duration-200
+                            ${activePanel === "changes" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-background/50"}`}
                         >
                           What Changed
                         </button>
                       </div>
-                      <Button variant="outline" size="sm" className="h-7 gap-1.5 text-xs" onClick={handleDownload}>
-                        <Download className="h-3 w-3" /> Download Resume
+                      <Button variant="outline" size="sm" className="h-9 gap-2 text-xs rounded-xl hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-colors" onClick={handleDownload}>
+                        <Download className="h-4 w-4" /> Download
                       </Button>
                     </div>
 
                     {/* Scrollable content */}
-                    <div className="flex-1 overflow-y-auto p-5">
+                    <div className="flex-1 overflow-y-auto p-6 md:p-8">
                       {activePanel === "resume" ? (
                         /* Resume paper shadow */
                         <div className="flex justify-center">
@@ -652,7 +650,7 @@ export function ResumeOptimizeModal({
                   </div>
 
                   {/* RIGHT — score + notes panel */}
-                  <div className="w-64 shrink-0 flex flex-col overflow-y-auto bg-background border-l border-border">
+                  <div className="w-[340px] shrink-0 flex flex-col overflow-y-auto bg-card border-l border-border/50 relative shadow-[-10px_0_30px_rgba(0,0,0,0.02)]">
                     <div className="p-5 space-y-5">
 
                       {/* Score improved */}

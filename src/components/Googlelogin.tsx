@@ -8,13 +8,12 @@ function GoogleSignInButton() {
   const navigate = useNavigate();
 
   return (
-    <div className="w-full [&>div]:!w-full [&>div>div]:!w-full [&_iframe]:!w-full">
+    <div className="w-full flex justify-center [&>div]:!w-full [&>div>div]:!w-full [&_iframe]:!w-full">
       <GoogleLogin
         theme="outline"
         size="large"
         text="signin_with"
         shape="rectangular"
-        width="400"
         useOneTap={false}
         onSuccess={async (credentialResponse) => {
           try {

@@ -16,6 +16,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const JobTrackerPage = lazy(() => import("./pages/JobTrackerpage"));
 const JobsPage = lazy(() => import("./pages/JobsPage"));
+const PlatformOptimizePage = lazy(() => import("./pages/PlatformOptimizePage"));
 const LoginPage = lazy(() => import("./pages/loginpage"));
 const SignupPage = lazy(() => import("./pages/signuppage"));
 const ForgotPasswordPage = lazy(() => import("./pages/forgotPasswordpage"));
@@ -23,13 +24,14 @@ const CareerProgressionPage = lazy(() =>
   import("./pages/CareerProgression")
 );
 const ChatPage = lazy(() => import("./pages/ChatPage"));
+const ReferralsPage = lazy(() => import("./pages/ReferralsPage"));
 const ResetPasswordPage = lazy(() =>
   import("./pages/Resetpassword")
 );
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const Contact = lazy(() => import("./pages/Contact"));
-const PricingPage = lazy(() => import("./pages/Pricingpage"));
+// const PricingPage = lazy(() => import("./pages/Pricingpage"));
 
 // 🔥 Optimized React Query client
 const queryClient = new QueryClient({
@@ -73,6 +75,15 @@ const App = () => (
             />
 
             <Route
+              path="/platform-optimize"
+              element={
+                <ProtectedRoute>
+                  <PlatformOptimizePage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
               path="/chat"
               element={
                 <ProtectedRoute>
@@ -100,6 +111,15 @@ const App = () => (
             />
 
             <Route
+              path="/referrals"
+              element={
+                <ProtectedRoute>
+                  <ReferralsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
               path="/career"
               element={
                 <ProtectedRoute>
@@ -117,7 +137,7 @@ const App = () => (
               }
             />
 
-            <Route path="/pricing" element={<PricingPage />} />
+            {/* <Route path="/pricing" element={<PricingPage />} /> */}
 
             <Route
               path="/reset-password"

@@ -3,8 +3,9 @@ import { Check, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useRazorpayPayment } from "@/hooks/useRazorpay";
+import { useAuth } from "@/hooks/useAuth";
 
 const plans = [
 {
@@ -59,6 +60,8 @@ const cardVariants = {
 
 const Pricing = () => {
   const { startPayment, loading } = useRazorpayPayment();
+  const navigate = useNavigate();
+  const { data: user } = useAuth();
   return (
     <section className="relative py-10 px-6 section-glow">
       <div className="max-w-5xl mx-auto">
@@ -135,9 +138,13 @@ const Pricing = () => {
   className="w-full group"
   onClick={() => {
     if (plan.name === "Pro") {
-      startPayment();
+      if (!user) {
+        navigate("/login");
+      } else {
+        startPayment();
+      }
     } else {
-      window.location.href = "/signup";
+      navigate("/signup");
     }
   }}
   disabled={loading}

@@ -96,7 +96,7 @@ const ResetPasswordPage = () => {
           <p className="text-muted-foreground text-sm">Set a new password</p>
         </div>
 
-        <Card className="border-border/50">
+        <Card className="glass-card shadow-2xl border-border/20">
           <CardContent className="pt-6 space-y-5">
             {success ? (
               <div className="text-center py-6 space-y-4">
@@ -123,7 +123,7 @@ const ResetPasswordPage = () => {
                       type={passwordVisible ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-9"
+                      className="pl-10 h-11 bg-muted/50 border-border"
                       placeholder="Enter new password"
                     />
                     <button
@@ -150,14 +150,14 @@ const ResetPasswordPage = () => {
                       type={confirmPasswordVisible ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="pl-9"
+                      className="pl-10 h-11 bg-muted/50 border-border"
                       placeholder="Confirm new password"
                     />
                     <button
                       type="button"
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                       onClick={() =>
-                        setConfirmPasswordVisible(!passwordVisible)
+                        setConfirmPasswordVisible(!confirmPasswordVisible)
                       }
                     >
                       {confirmPasswordVisible ? (
