@@ -79,7 +79,10 @@ export function useGetReferrals() {
       if (!res.ok) {
         throw new Error(data.message || data.error || "Failed to fetch referrals");
       }
-      return data.data; // API returns wrapped in 'data' object { requests, credits }
+      return {
+        requests: Array.isArray(data.data) ? data.data : [],
+        credits: data.credits || { remaining: 0 }
+      };
     },
     // Keep it relatively fresh for pending states
     refetchInterval: (data: any) => {

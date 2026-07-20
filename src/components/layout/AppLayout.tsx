@@ -237,7 +237,7 @@ const TopBar = ({ pageTitle, initials, credits, contactCredits, onMobileMenuOpen
     <div className="flex items-center gap-2">
       <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/[0.08] border border-blue-500/15 text-blue-400 text-xs font-medium shadow-sm">
         <Users className="h-3.5 w-3.5" />
-        {contactCredits} reveal credits
+        {contactCredits} Referral credits
       </div>
 
       <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/[0.08] border border-indigo-500/15 text-indigo-400 text-xs font-medium shadow-sm">

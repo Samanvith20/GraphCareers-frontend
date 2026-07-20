@@ -199,17 +199,10 @@ const StatsBar = ({ referrals }: StatsBarProps) => {
       color: "text-violet-400",
       bg: "bg-violet-400/10",
     },
-    {
-      label: "Processing",
-      value: stats.pendingRequests,
-      icon: Loader2,
-      color: "text-yellow-400",
-      bg: "bg-yellow-400/10",
-    },
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
       {statItems.map((stat, i) => (
         <motion.div
           key={stat.label}
@@ -404,30 +397,35 @@ function ContactCard({
 
           {/* Email row */}
           {isRevealed && email ? (
-            <div className="mt-2 inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-[#00D084]/[0.08] border border-[#00D084]/15">
-              <span className="text-xs font-medium text-[#00D084] font-mono tracking-wide">
-                {email}
-              </span>
-              <button
-                onClick={() => copyToClipboard(email)}
-                className="text-[#00D084]/60 hover:text-[#00D084] transition-colors"
-                title="Copy email"
-              >
-                {justCopied ? (
-                  <Check className="h-3 w-3" />
-                ) : (
-                  <Copy className="h-3 w-3" />
-                )}
-              </button>
-            </div>
-          ) : (
-            <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06]">
-              <Lock className="h-3 w-3 text-[#4b5563]" />
-              <span className="text-[11px] font-medium text-[#4b5563]">
-                Email locked
-              </span>
-            </div>
-          )}
+  <div className="mt-2 flex w-full items-center gap-2 rounded-lg border border-[#00D084]/15 bg-[#00D084]/[0.08] px-2.5 py-1.5 min-w-0">
+    <span
+      className="flex-1 min-w-0 truncate text-xs font-medium font-mono tracking-wide text-[#00D084]"
+      title={email}
+    >
+      {email}
+    </span>
+
+    <button
+      onClick={() => copyToClipboard(email)}
+      className="flex-shrink-0 rounded p-1 text-[#00D084]/70 transition-colors hover:bg-[#00D084]/10 hover:text-[#00D084]"
+      title="Copy email"
+      aria-label="Copy email"
+    >
+      {justCopied ? (
+        <Check className="h-3.5 w-3.5" />
+      ) : (
+        <Copy className="h-3.5 w-3.5" />
+      )}
+    </button>
+  </div>
+) : (
+  <div className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1.5">
+    <Lock className="h-3 w-3 text-[#4b5563]" />
+    <span className="text-[11px] font-medium text-[#4b5563]">
+      Email locked
+    </span>
+  </div>
+)}
         </div>
 
         {/* Action */}

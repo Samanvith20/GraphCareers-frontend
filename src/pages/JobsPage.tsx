@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   MapPin,
@@ -280,18 +280,20 @@ const cardVariants = {
   exit: { opacity: 0, scale: 0.97, transition: { duration: 0.15 } },
 };
 
-const JobCard = ({ job, index, onReferralClick }: JobCardProps) => {
-  const level = calculateLevel(job.minExp);
+const JobCard = forwardRef<HTMLDivElement, JobCardProps>(
+  ({ job, index, onReferralClick }, ref) => {
+    const level = calculateLevel(job.minExp);
 
-  return (
-    <motion.div
-      custom={index}
-      variants={cardVariants}
-      initial="hidden"
-      animate="visible"
-      exit="exit"
-      layout
-    >
+    return (
+      <motion.div
+        ref={ref}
+        custom={index}
+        variants={cardVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+        layout
+      >
       <div className="group glass-card border border-border/20 rounded-2xl shadow-card card-hover overflow-hidden">
         <div className="p-4 sm:px-6">
           <div className="flex items-start gap-3 sm:gap-4">
@@ -399,7 +401,8 @@ const JobCard = ({ job, index, onReferralClick }: JobCardProps) => {
       </div>
     </motion.div>
   );
-};
+});
+JobCard.displayName = "JobCard";
 
 // ─── Page Header ──────────────────────────────────────────────────────────────
 

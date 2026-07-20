@@ -47,7 +47,7 @@ export function ReferralModal({ open, onClose, jobTitle, companyName, jobId }: R
       const clearbitRes = await fetch(`https://autocomplete.clearbit.com/v1/companies/suggest?query=${encodeURIComponent(companyName)}`);
       if (clearbitRes.ok) {
         const suggestions = await clearbitRes.json();
-        console.log("suggestions for domain:;", suggestions);
+      //  console.log("suggestions for domain:;", suggestions);
         if (suggestions && suggestions.length > 0) {
           realDomain = suggestions[0].domain;
         }
