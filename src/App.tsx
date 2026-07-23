@@ -17,6 +17,7 @@ const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const JobTrackerPage = lazy(() => import("./pages/JobTrackerpage"));
 const JobsPage = lazy(() => import("./pages/JobsPage"));
 const PlatformOptimizePage = lazy(() => import("./pages/PlatformOptimizePage"));
+const ResumeCopilotWorkspace = lazy(() => import("./pages/ResumeCopilotWorkspace"));
 const LoginPage = lazy(() => import("./pages/loginpage"));
 const SignupPage = lazy(() => import("./pages/signuppage"));
 const ForgotPasswordPage = lazy(() => import("./pages/forgotPasswordpage"));
@@ -79,6 +80,15 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <PlatformOptimizePage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/platform-copilot/:platform"
+              element={
+                <ProtectedRoute>
+                  <ResumeCopilotWorkspace />
                 </ProtectedRoute>
               }
             />

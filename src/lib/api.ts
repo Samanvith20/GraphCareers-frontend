@@ -30,3 +30,24 @@ export async function apiPost<T>(
 
   return data;
 }
+
+export async function apiGet<T>(path: string): Promise<T> {
+  const res = await fetch(`${BASE_URL}/api${path}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+  });
+
+  const data = await res.json();
+  
+  if (!res.ok) {
+    const errMsg = typeof data.error === 'object' && data.error !== null 
+      ? data.error.message || "Request failed" 
+      : data.message || data.error || "Request failed";
+    throw new Error(errMsg);
+  }
+
+  return data;
+}
