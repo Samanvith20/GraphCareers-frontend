@@ -9,6 +9,7 @@ import AppLayout from "@/components/layout/AppLayout";
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/hooks/useAuth";
 import { useStartPlatformOptimize, usePlatformOptimizeStatus } from "@/hooks/usePlatformOptimize";
+import { useNavigate } from "react-router-dom";
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -185,17 +186,17 @@ const PLATFORMS = [
 ];
 
 const LOADING_MESSAGES = [
-  "Fetching top matching jobs for your profile...",
-  "Analyzing trending skills for your profile...",
-  "Rephrasing resume bullets to match ATS algorithms...",
-  "Formatting document structure...",
-  "Finalizing optimization..."
+  "Step 1/4: Querying Neo4j Graph for top matching jobs on {platform}...",
+  "Step 2/4: Formulating AI Reasoning Plan & Analyzing Skill Gaps...",
+  "Step 3/4: Executing Tool Engine Rewrites & Metric Enhancements...",
+  "Step 4/4: Scoring ATS Impact & Generating Actionable Suggestions...",
 ];
 
 export default function PlatformOptimizePage() {
   const { data: profile } = useProfile();
   const { data: authData } = useAuth();
   const startMutation = useStartPlatformOptimize();
+  const navigate = useNavigate();
   const [activePlatformStr, setActivePlatformStr] = useState<string | null>(null);
   const [timeoutError, setTimeoutError] = useState(false);
   
@@ -455,263 +456,24 @@ export default function PlatformOptimizePage() {
     );
   }
 
-  // State: Completed
+  // State: Completed - Navigate to Workspace
   if (statusData.status === "completed" && (statusData.optimizedResume || statusData.optimizedJson)) {
-    const scoreBefore = statusData.atsScores.before ?? 0;
-    const scoreAfter = statusData.atsScores.after ?? 0;
-    const scoreIncrease = scoreAfter - scoreBefore;
+    // Route to Copilot Workspace
+    setTimeout(() => {
+      navigate(`/platform-copilot/${activePlatformStr}`);
+    }, 500);
 
     return (
       <AppLayout>
-        <div className="max-w-7xl mx-auto px-6 py-10 relative">
-          {/* Subtle gradient background element */}
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none -z-10" />
-          
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-10 gap-4">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground flex items-center gap-3">
-                Optimization Complete
-                <CheckCircle2 className="h-8 w-8 text-emerald-500" />
-              </h1>
-              <p className="text-muted-foreground mt-2 text-sm font-medium">Targeted against top matching jobs on {selectedPlatform?.name}</p>
-            </div>
-            
-            <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-              <Button 
-                variant="outline"
-                onClick={() => { setActivePlatformStr(null); setSelectedPlatform(null); }}
-                className="flex-1 md:flex-none gap-2 rounded-xl border-border/60 hover:bg-white/5"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Start Over
-              </Button>
-              <Button 
-                onClick={() => downloadFile("pdf")} 
-                disabled={downloading !== null}
-                className="flex-1 md:flex-none gap-2 bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white shadow-lg shadow-primary/20 rounded-xl"
-              >
-                {downloading === "pdf" ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}
-                Download Resume
-              </Button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-8 items-start relative">
-            {/* Left Column: Live Preview */}
-            <div className="flex flex-col gap-6 lg:sticky lg:top-24 h-[calc(100vh-8rem)]">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-foreground/90 shrink-0">
-                <FileText className="h-5 w-5 text-primary" /> Live Resume Preview
-              </h3>
-              <div className="bg-card/40 backdrop-blur-md p-6 md:p-8 rounded-3xl border border-border/50 shadow-inner overflow-auto flex-1 flex justify-center items-start">
-                 <div className="w-full max-w-[800px] min-w-[600px] mx-auto bg-white shadow-2xl rounded-sm shrink-0">
-                    <ResumeDocument resume={statusData.optimizedResume || statusData.optimizedJson} keywordsAdded={statusData.keywordsAdded} />
-                 </div>
-              </div>
-            </div>
-
-            {/* Right Column: Dashboard */}
-            <div className="flex flex-col gap-6">
-              {/* A. Hero / Score Header (Animated Gauge) */}
-              <div className="bg-card/60 backdrop-blur-xl rounded-3xl border border-white/5 p-8 shadow-xl relative overflow-hidden flex flex-col items-center text-center">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-[40px] -z-10 translate-x-1/2 -translate-y-1/2" />
-                
-                <h3 className="text-xl font-bold text-foreground mb-1">Optimization Successful!</h3>
-                <p className="text-sm text-muted-foreground mb-6">
-                  Your resume is now highly optimized for {selectedPlatform?.name} algorithms.
-                </p>
-
-                {/* Animated Gauge */}
-                <div className="relative w-48 h-48 flex items-center justify-center mb-4">
-                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                    {/* Background Track */}
-                    <circle cx="50" cy="50" r="40" className="stroke-white/5" strokeWidth="8" fill="none" />
-                    {/* Animated Score Bar */}
-                    <motion.circle 
-                      cx="50" cy="50" r="40" 
-                      className="stroke-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" 
-                      strokeWidth="8" fill="none" strokeLinecap="round"
-                      initial={{ strokeDasharray: "0, 251.2" }}
-                      animate={{ strokeDasharray: `${(scoreAfter / 100) * 251.2}, 251.2` }}
-                      transition={{ duration: 1.5, ease: "easeOut" }}
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <motion.span 
-                      className="text-5xl font-bold text-emerald-400 drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.5 }}
-                    >
-                      {scoreAfter}
-                    </motion.span>
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mt-1">ATS Score</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4 bg-background/50 rounded-2xl px-5 py-3 border border-white/5">
-                  <div className="text-center">
-                    <div className="text-sm font-semibold text-muted-foreground">{scoreBefore}</div>
-                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground/60">Before</div>
-                  </div>
-                  {statusData.improvement && (
-                    <span className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full shadow-sm border border-emerald-500/20">
-                      +{statusData.improvement} Pts
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* B. The "Skills to Learn" Roadmap */}
-              {statusData.skillRecommendations && statusData.skillRecommendations.length > 0 && (
-                <div className="bg-card/60 backdrop-blur-xl rounded-3xl border border-white/5 p-6 shadow-xl relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-[40px] -z-10 translate-x-1/2 -translate-y-1/2" />
-                  <h3 className="text-xs font-bold text-primary mb-3 uppercase tracking-widest flex items-center gap-2">
-                    Strategic Skill Roadmap
-                  </h3>
-                  <p className="text-[13px] text-muted-foreground mb-5 leading-relaxed">
-                    Based on market trends, adding these real-world skills to your toolkit will drastically increase your callback rate.
-                  </p>
-                  <div className="space-y-4">
-                    {statusData.skillRecommendations.map((rec, i) => {
-                      const imp = rec.importance.toLowerCase();
-                      const isCritical = imp === "critical";
-                      const isHigh = imp === "high";
-                      const colorTheme = isCritical 
-                        ? { bg: "bg-red-500/5 hover:bg-red-500/10", border: "border-red-500/10", badgeBg: "bg-red-500/20", badgeText: "text-red-400", badgeBorder: "border-red-500/20" }
-                        : isHigh 
-                        ? { bg: "bg-amber-500/5 hover:bg-amber-500/10", border: "border-amber-500/10", badgeBg: "bg-amber-500/20", badgeText: "text-amber-400", badgeBorder: "border-amber-500/20" }
-                        : { bg: "bg-blue-500/5 hover:bg-blue-500/10", border: "border-blue-500/10", badgeBg: "bg-blue-500/20", badgeText: "text-blue-400", badgeBorder: "border-blue-500/20" };
-
-                      return (
-                        <div key={i} className={`flex flex-col p-4 rounded-2xl border transition-colors ${colorTheme.bg} ${colorTheme.border}`}>
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-semibold text-foreground capitalize">
-                                {rec.skill}
-                              </span>
-                              <span className={`text-[9px] uppercase font-bold px-2 py-0.5 rounded-full border ${colorTheme.badgeBg} ${colorTheme.badgeText} ${colorTheme.badgeBorder}`}>
-                                {rec.importance}
-                              </span>
-                            </div>
-                            <span className={`text-[10px] font-bold px-2 py-1 rounded-md shadow-sm border ${colorTheme.badgeBg} ${colorTheme.badgeText} ${colorTheme.badgeBorder}`}>
-                              {rec.demandPct}% Demand
-                            </span>
-                          </div>
-                          <p className="text-xs text-muted-foreground leading-relaxed font-medium">
-                            {rec.learnMessage}
-                          </p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* C. Platform Trends (Market Intelligence) */}
-              {statusData.scoreDetails?.topPlatformSkills && statusData.scoreDetails.topPlatformSkills.length > 0 && (
-                <div className="bg-card/60 backdrop-blur-xl rounded-3xl border border-white/5 p-6 shadow-xl">
-                  <h3 className="text-xs font-bold text-muted-foreground mb-4 uppercase tracking-widest">
-                    Platform Skill Trends ({selectedPlatform?.name})
-                  </h3>
-                  <div className="space-y-3">
-                    {statusData.scoreDetails.topPlatformSkills.map((trend, i) => (
-                      <div key={i} className="flex flex-col gap-1.5">
-                        <div className="flex justify-between text-xs font-medium">
-                          <span className="capitalize text-foreground/90">{trend.skill}</span>
-                          <span className="text-muted-foreground">{trend.pct}%</span>
-                        </div>
-                        <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                          <motion.div 
-                            className="h-full bg-primary/60 rounded-full" 
-                            initial={{ width: 0 }} 
-                            animate={{ width: `${trend.pct}%` }} 
-                            transition={{ duration: 1, delay: 0.2 + i * 0.1 }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Optimization Notes & Keywords */}
-              {(statusData.optimizationNotes || statusData.keywordsAdded || statusData.keywordsMissing) && (
-                <div className="bg-card/60 backdrop-blur-xl rounded-3xl border border-white/5 p-6 shadow-xl">
-                  {statusData.optimizationNotes && statusData.optimizationNotes.length > 0 && (
-                    <>
-                      <h3 className="text-xs font-bold text-muted-foreground mb-4 uppercase tracking-widest">What AI Changed</h3>
-                      <ul className="space-y-3.5">
-                        {statusData.optimizationNotes.map((note, i) => (
-                          <li key={i} className="flex gap-3 text-sm text-foreground/90 leading-relaxed">
-                            <Zap className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                            <span>{note}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </>
-                  )}
-                  {statusData.keywordsAdded && statusData.keywordsAdded.length > 0 && (
-                    <div className={`pt-5 ${statusData.optimizationNotes && statusData.optimizationNotes.length > 0 ? 'mt-5 border-t border-white/5' : ''}`}>
-                       <p className="text-xs font-bold text-emerald-400 mb-3 uppercase tracking-widest">Keywords Infused</p>
-                       <div className="flex flex-wrap gap-2">
-                         {statusData.keywordsAdded.map(kw => (
-                           <span key={kw} className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-sm capitalize">
-                             {kw}
-                           </span>
-                         ))}
-                       </div>
-                    </div>
-                  )}
-                  {statusData.keywordsMissing && statusData.keywordsMissing.length > 0 && (
-                    <div className={`pt-5 mt-5 border-t border-white/5`}>
-                       <p className="text-xs font-bold text-red-400 mb-3 uppercase tracking-widest">Still Missing (Action Required)</p>
-                       <p className="text-xs text-muted-foreground mb-3">You don't have these skills in your profile, so we couldn't add them safely. Consider learning these:</p>
-                       <div className="flex flex-wrap gap-2">
-                         {statusData.keywordsMissing.map((kw: string) => (
-                           <span key={kw} className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 shadow-sm capitalize">
-                             {kw}
-                           </span>
-                         ))}
-                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-            </div>
-          </div>
-
-          {/* Actionable CTA Footer */}
-          <div className="mt-12 p-8 bg-card/60 backdrop-blur-xl border border-white/5 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl relative overflow-hidden">
-            <div className="absolute top-1/2 left-0 w-[400px] h-[200px] bg-primary/10 rounded-full blur-[60px] -z-10 -translate-y-1/2" />
-            <div>
-              <h2 className="text-2xl font-bold tracking-tight text-foreground">Ready to land interviews?</h2>
-              <p className="text-muted-foreground mt-1.5 max-w-md">Your resume is now hyper-optimized. Download it and start applying on {selectedPlatform?.name} right away.</p>
-            </div>
-            <div className="flex flex-col sm:flex-row w-full md:w-auto gap-4">
-              <Button 
-                onClick={() => downloadFile("pdf")} 
-                disabled={downloading !== null}
-                size="lg"
-                className="w-full sm:w-auto gap-2 bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white shadow-lg shadow-primary/20 rounded-xl h-14 px-8 text-base"
-              >
-                {downloading === "pdf" ? <Loader2 className="h-5 w-5 animate-spin" /> : <FileDown className="h-5 w-5" />}
-                Download ATS-Friendly Resume
-              </Button>
-              <Button 
-                onClick={() => window.location.href = '/jobs'}
-                size="lg"
-                className="w-full sm:w-auto gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/30 rounded-xl h-14 px-8 text-base"
-              >
-                <Briefcase className="h-5 w-5" />
-                Apply to Jobs Now
-              </Button>
-            </div>
-          </div>
+        <div className="flex h-full min-h-[70vh] flex-col items-center justify-center space-y-4">
+          <CheckCircle2 className="h-12 w-12 text-emerald-500 animate-pulse" />
+          <h2 className="text-xl font-bold">Optimization Complete!</h2>
+          <p className="text-muted-foreground">Opening your AI Resume Copilot...</p>
         </div>
       </AppLayout>
     );
   }
+
   
   return null;
 }
