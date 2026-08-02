@@ -186,11 +186,10 @@ const PLATFORMS = [
 ];
 
 const LOADING_MESSAGES = [
-  "Fetching top matching jobs for your profile...",
-  "Analyzing trending skills for your profile...",
-  "Rephrasing resume bullets to match ATS algorithms...",
-  "Formatting document structure...",
-  "Finalizing optimization..."
+  "Step 1/4: Querying Neo4j Graph for top matching jobs on {platform}...",
+  "Step 2/4: Formulating AI Reasoning Plan & Analyzing Skill Gaps...",
+  "Step 3/4: Executing Tool Engine Rewrites & Metric Enhancements...",
+  "Step 4/4: Scoring ATS Impact & Generating Actionable Suggestions...",
 ];
 
 export default function PlatformOptimizePage() {

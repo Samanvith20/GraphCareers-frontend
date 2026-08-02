@@ -33,48 +33,9 @@ const ACTION_MAP: Record<string, { label: string; icon: any }[]> = {
   ],
 };
 
-function HoverToolbar({ actions, onAction, isProcessing }: { actions: any[]; onAction: (l: string) => void; isProcessing?: boolean }) {
+function SectionWrapper({ children }: { children: any }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 5 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      className="absolute -top-3 right-0 flex items-center gap-1 rounded-lg border border-primary/20 bg-card/95 px-1 py-1 shadow-xl shadow-black/20 backdrop-blur-md z-10"
-    >
-      <div className="px-1.5 flex items-center gap-1 border-r border-border/50 text-[9px] font-bold text-primary tracking-widest uppercase">
-        <Zap className="h-3 w-3" /> AI
-      </div>
-      {actions.map((a, i) => {
-        const Icon = a.icon;
-        return (
-          <Button
-            key={i}
-            variant="ghost"
-            size="sm"
-            onClick={(e) => { e.stopPropagation(); onAction(a.label); }}
-            disabled={isProcessing}
-            className="h-6 px-2 text-[10px] hover:bg-primary/10 hover:text-primary gap-1"
-          >
-            {isProcessing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Icon className="h-3 w-3" />}
-            {a.label}
-          </Button>
-        );
-      })}
-    </motion.div>
-  );
-}
-
-function SectionWrapper({ children, actions, onAction, isProcessing }: any) {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <div 
-      className={cn("relative group rounded-xl transition-all duration-200 border border-transparent hover:border-primary/10 hover:bg-primary/[0.02] p-3 -mx-3", isProcessing && "opacity-60")}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      <AnimatePresence>
-        {hovered && <HoverToolbar actions={actions} onAction={onAction} isProcessing={isProcessing} />}
-      </AnimatePresence>
+    <div className="py-2">
       {children}
     </div>
   );
@@ -85,58 +46,51 @@ export function ResumePreview({ snapshot, onEdit, isProcessing }: ResumePreviewP
   const { contact, summary, experience, projects, skills, education, certifications } = snapshot;
 
   const SectionHeader = ({ title }: { title: string }) => (
-    <div className="flex items-center gap-3 mt-4 mb-2">
-      <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-primary">{title}</span>
-      <div className="flex-1 h-px bg-border/40" />
+    <div className="flex items-center gap-3 mt-6 mb-3">
+      <span className="text-[11px] font-extrabold uppercase tracking-[0.15em] text-emerald-400">{title}</span>
+      <div className="flex-1 h-px bg-gradient-to-r from-emerald-500/30 via-white/10 to-transparent" />
     </div>
   );
 
   return (
-    <div className="w-full max-w-[850px] mx-auto bg-card rounded-xl border border-border/50 shadow-sm p-8 lg:p-12 text-foreground font-sans text-xs leading-relaxed">
+    <div className="w-full max-w-[850px] mx-auto bg-[#0E131F] text-slate-100 rounded-2xl border border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.6)] p-8 lg:p-12 font-sans text-xs leading-relaxed relative">
       
-      {/* Header */}
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold mb-1">{contact?.name || "Your Name"}</h1>
-        <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
-          {contact?.location && <span>{contact.location}</span>}
-          {contact?.phone && <span>{contact.phone}</span>}
-          {contact?.email && <span>{contact.email}</span>}
-          {contact?.linkedin && <span>{contact.linkedin}</span>}
+      {/* Executive Document Header */}
+      <div className="text-center mb-8 pb-6 border-b border-white/10">
+        <h1 className="text-3xl font-extrabold tracking-tight mb-2 text-white">{contact?.name || "Your Name"}</h1>
+        <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-[11px] text-slate-400 font-medium">
+          {contact?.location && <span className="hover:text-emerald-400 transition-colors">{contact.location}</span>}
+          {contact?.phone && <span>• {contact.phone}</span>}
+          {contact?.email && <span className="hover:text-emerald-400 transition-colors">• {contact.email}</span>}
+          {contact?.linkedin && <span className="hover:text-emerald-400 transition-colors">• {contact.linkedin}</span>}
+          {contact?.github && <span className="hover:text-emerald-400 transition-colors">• {contact.github}</span>}
         </div>
       </div>
 
       {/* Summary */}
       {summary && (
-        <SectionWrapper 
-          actions={ACTION_MAP.summary} 
-          onAction={(a: string) => onEdit(a.toUpperCase(), { section: "summary" })}
-          isProcessing={isProcessing}
-        >
+        <SectionWrapper>
           <SectionHeader title="Summary" />
-          <p className="text-foreground/90">{summary}</p>
+          <p className="text-slate-300 leading-relaxed">{summary}</p>
         </SectionWrapper>
       )}
 
       {/* Experience */}
       {experience?.length > 0 && (
-        <SectionWrapper 
-          actions={ACTION_MAP.experience} 
-          onAction={(a: string) => onEdit(a.toUpperCase(), { section: "experience" })}
-          isProcessing={isProcessing}
-        >
+        <SectionWrapper>
           <SectionHeader title="Experience" />
           <div className="space-y-4">
             {experience.map((exp: any, i: number) => (
               <div key={i}>
                 <div className="flex justify-between items-baseline mb-1">
                   <div>
-                    <span className="font-bold text-[13px]">{exp.company}</span>
-                    <span className="mx-2 text-muted-foreground">|</span>
-                    <span className="text-primary font-medium">{exp.title}</span>
+                    <span className="font-bold text-[13px] text-white">{exp.company}</span>
+                    <span className="mx-2 text-slate-500">|</span>
+                    <span className="text-emerald-400 font-medium">{exp.title}</span>
                   </div>
-                  <span className="text-[10px] text-muted-foreground shrink-0">{exp.startDate} – {exp.endDate}</span>
+                  <span className="text-[10px] text-slate-400 shrink-0">{exp.startDate} – {exp.endDate}</span>
                 </div>
-                <ul className="list-disc list-outside ml-4 space-y-1 text-foreground/80">
+                <ul className="list-disc list-outside ml-4 space-y-1 text-slate-300">
                   {exp.bullets.map((b: string, j: number) => (
                     <li key={j}>{b}</li>
                   ))}
@@ -149,20 +103,16 @@ export function ResumePreview({ snapshot, onEdit, isProcessing }: ResumePreviewP
 
       {/* Projects */}
       {projects?.length > 0 && (
-        <SectionWrapper 
-          actions={ACTION_MAP.projects} 
-          onAction={(a: string) => onEdit(a.toUpperCase(), { section: "projects" })}
-          isProcessing={isProcessing}
-        >
+        <SectionWrapper>
           <SectionHeader title="Projects" />
           <div className="space-y-4">
             {projects.map((proj: any, i: number) => (
               <div key={i}>
                 <div className="flex justify-between items-baseline mb-1">
-                  <span className="font-bold">{proj.name}</span>
-                  {proj.date && <span className="text-[10px] text-muted-foreground">{proj.date}</span>}
+                  <span className="font-bold text-white">{proj.name}</span>
+                  {proj.date && <span className="text-[10px] text-slate-400">{proj.date}</span>}
                 </div>
-                <ul className="list-disc list-outside ml-4 space-y-1 text-foreground/80">
+                <ul className="list-disc list-outside ml-4 space-y-1 text-slate-300">
                   {proj.bullets.map((b: string, j: number) => (
                     <li key={j}>{b}</li>
                   ))}
@@ -175,17 +125,13 @@ export function ResumePreview({ snapshot, onEdit, isProcessing }: ResumePreviewP
 
       {/* Skills */}
       {skills && Object.keys(skills).length > 0 && (
-        <SectionWrapper 
-          actions={ACTION_MAP.skills} 
-          onAction={(a: string) => onEdit(a.toUpperCase(), { section: "skills" })}
-          isProcessing={isProcessing}
-        >
+        <SectionWrapper>
           <SectionHeader title="Skills" />
           <div className="space-y-1.5">
             {Object.entries(skills).map(([category, items]: any, i) => (
               <div key={i} className="flex gap-2">
-                <span className="font-semibold w-24 shrink-0">{category}:</span>
-                <span className="text-foreground/80">{items.join(", ")}</span>
+                <span className="font-semibold text-slate-300 w-28 shrink-0 capitalize">{category}:</span>
+                <span className="text-slate-300">{Array.isArray(items) ? items.join(", ") : String(items)}</span>
               </div>
             ))}
           </div>
@@ -193,24 +139,24 @@ export function ResumePreview({ snapshot, onEdit, isProcessing }: ResumePreviewP
       )}
 
       {/* Education */}
-      {education?.length > 0 && (
-        <div className="p-3 -mx-3">
+      {education && (
+        <SectionWrapper>
           <SectionHeader title="Education" />
-          <div className="space-y-2">
-            {education.map((edu: any, i: number) => (
-              <div key={i} className="flex justify-between">
+          <div className="space-y-3">
+            {(Array.isArray(education) ? education : [education]).map((edu: any, i: number) => (
+              <div key={i} className="flex justify-between items-start">
                 <div>
-                  <div className="font-bold">{edu.institution}</div>
-                  <div className="text-foreground/80">{edu.degree} in {edu.field}</div>
+                  <div className="font-bold text-white">{edu.institution || edu.school || edu.college}</div>
+                  <div className="text-slate-300">{edu.degree || edu.title} {edu.field ? `in ${edu.field}` : ""}</div>
                 </div>
-                <div className="text-right text-[10px] text-muted-foreground">
-                  <div>{edu.startDate} – {edu.endDate}</div>
+                <div className="text-right text-[10px] text-slate-400 shrink-0">
+                  {edu.startDate && <div>{edu.startDate} – {edu.endDate || "Present"}</div>}
                   {edu.gpa && <div>GPA: {edu.gpa}</div>}
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </SectionWrapper>
       )}
     </div>
   );

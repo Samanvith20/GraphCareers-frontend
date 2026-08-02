@@ -108,15 +108,7 @@ export function InsightsPanel({
                     rec.importance.toLowerCase() === "critical" ? "bg-red-500/10 text-red-400" : "bg-amber-500/10 text-amber-400"
                   )}>{rec.demandPct}% Demand</span>
                 </div>
-                <p className="text-[10px] text-muted-foreground mb-3 line-clamp-2">{rec.learnMessage}</p>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="w-full h-7 text-[10px] gap-1 bg-background"
-                  onClick={() => onCopilotRequest(`How can I learn and add ${rec.skill} to my profile?`)}
-                >
-                  <Sparkles className="h-3 w-3" /> Ask Copilot
-                </Button>
+                <p className="text-[10px] text-muted-foreground line-clamp-2">{rec.learnMessage}</p>
               </div>
             ))}
           </div>
@@ -127,29 +119,37 @@ export function InsightsPanel({
       {recommendations?.length > 0 && (
         <div className="bg-card/40 backdrop-blur-md rounded-2xl p-5 border border-border/50 xl:col-span-2">
           <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
-            <Sparkles className="h-4 w-4" /> AI Recommendations
+            <Sparkles className="h-4 w-4 text-primary" /> AI Structural Improvements & Recommendations
           </h3>
-          <div className="space-y-2">
-            {recommendations.map((rec, i) => (
-              <div key={i} className="flex items-center justify-between p-3 rounded-xl border border-border/40 bg-background/40 hover:border-primary/30 transition-colors group">
-                <div>
-                  <h4 className="text-xs font-bold text-foreground">{rec.title}</h4>
-                  <p className="text-[10px] text-muted-foreground">{rec.description}</p>
+          <div className="space-y-2.5">
+            {recommendations.map((rec: any, i: number) => {
+              const title = typeof rec === "string" ? rec : rec.title || rec.description || JSON.stringify(rec);
+              const desc = typeof rec === "object" ? rec.description : null;
+              const gain = typeof rec === "object" ? rec.estimatedAtsGain || rec.atsGain : 5;
+
+              return (
+                <div key={i} className="flex items-center justify-between p-3.5 rounded-xl border border-border/40 bg-background/50 hover:border-primary/40 transition-colors group">
+                  <div className="flex-1 pr-4">
+                    <h4 className="text-xs font-semibold text-foreground/90 leading-relaxed">{title}</h4>
+                    {desc && <p className="text-[11px] text-muted-foreground mt-0.5">{desc}</p>}
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                      +{gain} ATS Points
+                    </span>
+                    {typeof rec === "object" && rec.actionType && (
+                      <Button 
+                        size="sm"
+                        className="h-7 text-[10px] gap-1 bg-primary/90 text-primary-foreground hover:bg-primary"
+                        onClick={() => onApplyAction(rec.actionType, rec.actionPayload)}
+                      >
+                        Apply <ArrowRight className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-[10px] font-semibold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                    +{rec.estimatedAtsGain} ATS
-                  </span>
-                  <Button 
-                    size="sm"
-                    className="h-7 text-[10px] gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => onApplyAction(rec.actionType, rec.actionPayload)}
-                  >
-                    Apply <ArrowRight className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
