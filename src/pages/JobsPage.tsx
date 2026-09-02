@@ -22,7 +22,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useMatchedJobs, type JobDaysFilter } from "@/hooks/useMatchedJobs";
-import { useProfile } from "@/hooks/useProfile";
 import AppLayout from "@/components/layout/AppLayout";
 import ErrorPage from "./ErrorPage";
 import {
@@ -33,8 +32,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Link } from "react-router-dom";
-import { ResumeScoreModal } from "@/components/resume/ResumeScoreModal";
-import { ResumeOptimizeModal } from "@/components/resume/ResumeOptimizeModal";
 import { useRequestReferrals } from "@/hooks/useReferrals";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -451,8 +448,6 @@ const PageHeader = ({
 
 const JobsPage = () => {
   const [days, setDays] = useState<JobDaysFilter>(3);
-  const [scoreModalJob,    setScoreModalJob]    = useState<{ jobSourceId: string; title: string; company: string } | null>(null);
-  const [optimizeModalJob, setOptimizeModalJob] = useState<{ jobSourceId: string; title: string; company: string } | null>(null);
 
   const requestReferralsMutation = useRequestReferrals();
 
@@ -475,8 +470,6 @@ const JobsPage = () => {
       }
     );
   };
-
-  const { data: profile } = useProfile();
 
   const {
     data,
@@ -611,30 +604,6 @@ const JobsPage = () => {
         )}
       </div>
 
-      {/* Modals */}
-      {scoreModalJob && (
-        <ResumeScoreModal
-          open
-          jobSourceId={scoreModalJob.jobSourceId}
-          jobTitle={scoreModalJob.title}
-          company={scoreModalJob.company}
-          onClose={() => setScoreModalJob(null)}
-          onOptimize={() => {
-            setOptimizeModalJob(scoreModalJob);
-            setScoreModalJob(null);
-          }}
-        />
-      )}
-      {optimizeModalJob && (
-        <ResumeOptimizeModal
-          open
-          jobSourceId={optimizeModalJob.jobSourceId}
-          jobTitle={optimizeModalJob.title}
-          company={optimizeModalJob.company}
-          userCredits={profile?.credits ?? 0}
-          onClose={() => setOptimizeModalJob(null)}
-        />
-      )}
     </AppLayout>
   );
 };

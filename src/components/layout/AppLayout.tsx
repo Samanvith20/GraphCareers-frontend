@@ -32,7 +32,7 @@ import { useGetReferrals } from "@/hooks/useReferrals";
 
 const mainNavItems = [
   { label: "Jobs",          href: "/jobs",              icon: Briefcase },
-  { label: "Platform ATS",  href: "/platform-optimize", icon: ChartNoAxesColumnDecreasing },
+  { label: "Resume Agent",  href: "/platform-optimize", icon: ChartNoAxesColumnDecreasing },
   { label: "Referrals",     href: "/referrals",         icon: Users },
   { label: "Tracker",       href: "/tracker",           icon: LayoutDashboard },
   // { label: "Career",        href: "/career",            icon: TrendingUp },
@@ -258,7 +258,7 @@ const TopBar = ({ pageTitle, initials, credits, contactCredits, onMobileMenuOpen
 
 const pageTitles: Record<string, string> = {
   "/jobs":              "Jobs For You",
-  "/platform-optimize": "Platform ATS",
+  "/platform-optimize": "AI Resume Agent",
   "/referrals":         "Referrals",
   "/tracker":           "Job Tracker",
   "/career":            "Career Roadmap",
