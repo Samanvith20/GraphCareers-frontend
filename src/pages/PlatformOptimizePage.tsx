@@ -12,6 +12,7 @@ import {
   BriefcaseBusiness,
   Check,
   CheckCircle2,
+  ChevronsUpDown,
   Download,
   FileText,
   Loader2,
@@ -30,9 +31,11 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -47,6 +50,7 @@ import {
   useResumeAgentVersion,
   useResumeAgentWorkspace,
   useStartResumeAgent,
+  usePlatformRoles,
 } from "@/hooks/useResumeAgent";
 import { useProfile } from "@/hooks/useProfile";
 import { cn } from "@/lib/utils";
@@ -54,7 +58,7 @@ import type { MissingSkillConfirmation, ResumeAgentRun, ResumeProposal, ResumeSc
 
 const platformSchema = z.object({
   platform: z.string().min(2, "Choose a platform"),
-  role: z.string().trim().min(2, "Enter the role you are targeting").max(200),
+  role: z.string().trim().min(2, "Choose an available role").max(200),
   location: z.string().trim().max(200).optional(),
 });
 
@@ -115,6 +119,7 @@ function SetupScreen({ onStarted }: { onStarted: (runId: string) => void }) {
   const { data: profile } = useProfile();
   const workspace = useResumeAgentWorkspace(true);
   const start = useStartResumeAgent();
+  const [roleSelectorOpen, setRoleSelectorOpen] = useState(false);
   const platformForm = useForm<PlatformForm>({
     resolver: zodResolver(platformSchema),
     defaultValues: { platform: "naukri", role: "", location: "" },
@@ -123,11 +128,18 @@ function SetupScreen({ onStarted }: { onStarted: (runId: string) => void }) {
     resolver: zodResolver(manualSchema),
     defaultValues: { jobTitle: "", companyName: "", jobDescription: "" },
   });
+  const selectedPlatform = platformForm.watch("platform");
+  const platformRoles = usePlatformRoles(selectedPlatform);
+  const availableRoles = useMemo(() => platformRoles.data?.roles || [], [platformRoles.data?.roles]);
 
   useEffect(() => {
-    if (profile?.role && !platformForm.getValues("role")) platformForm.setValue("role", profile.role);
+    if (profile?.role && !platformForm.getValues("role") && availableRoles.length) {
+      const profileRole = profile.role.trim().toLowerCase();
+      const matchingRole = availableRoles.find((role) => role.name.toLowerCase() === profileRole);
+      if (matchingRole) platformForm.setValue("role", matchingRole.name);
+    }
     if (profile?.location && !platformForm.getValues("location")) platformForm.setValue("location", profile.location);
-  }, [platformForm, profile?.location, profile?.role]);
+  }, [availableRoles, platformForm, profile?.location, profile?.role]);
 
   const startPlatform = platformForm.handleSubmit(async (values) => {
     try {
@@ -206,16 +218,69 @@ function SetupScreen({ onStarted }: { onStarted: (runId: string) => void }) {
                   <div>
                     <Label>Platform</Label>
                     <Controller control={platformForm.control} name="platform" render={({ field }) => (
-                      <Select value={field.value} onValueChange={field.onChange}>
+                      <Select value={field.value} onValueChange={(value) => {
+                        field.onChange(value);
+                        platformForm.setValue("role", "", { shouldValidate: true });
+                        setRoleSelectorOpen(false);
+                      }}>
                         <SelectTrigger className="mt-2"><SelectValue /></SelectTrigger>
                         <SelectContent>{PLATFORMS.map((platform) => <SelectItem key={platform.value} value={platform.value}>{platform.label}</SelectItem>)}</SelectContent>
                       </Select>
                     )} />
                   </div>
                   <div>
-                    <Label htmlFor="target-role">Target role</Label>
-                    <Input id="target-role" className="mt-2" placeholder="Senior Backend Engineer" {...platformForm.register("role")} />
+                    <Label>Target role</Label>
+                    <Controller control={platformForm.control} name="role" render={({ field }) => (
+                      <Popover open={roleSelectorOpen} onOpenChange={setRoleSelectorOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={roleSelectorOpen}
+                            disabled={platformRoles.isLoading || platformRoles.isError}
+                            className="mt-2 w-full justify-between font-normal"
+                          >
+                            <span className="truncate">
+                              {platformRoles.isLoading ? "Loading available roles..." : field.value || "Choose a role available on this platform"}
+                            </span>
+                            {platformRoles.isLoading ? <Loader2 className="ml-2 h-4 w-4 shrink-0 animate-spin" /> : <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] p-0">
+                          <Command>
+                            <CommandInput placeholder="Search available roles..." />
+                            <CommandList>
+                              <CommandEmpty>No available role found.</CommandEmpty>
+                              <CommandGroup>
+                                {availableRoles.map((role) => (
+                                  <CommandItem
+                                    key={role.name}
+                                    value={`${role.name} ${role.jobCount}`}
+                                    onSelect={() => {
+                                      field.onChange(role.name);
+                                      platformForm.clearErrors("role");
+                                      setRoleSelectorOpen(false);
+                                    }}
+                                  >
+                                    <Check className={cn("mr-2 h-4 w-4", field.value === role.name ? "opacity-100" : "opacity-0")} />
+                                    <span className="min-w-0 flex-1 truncate">{role.name}</span>
+                                    <span className="ml-3 text-xs text-muted-foreground">{role.jobCount.toLocaleString()} jobs</span>
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                    )} />
                     <FieldError message={platformForm.formState.errors.role?.message} />
+                    {platformRoles.isError && (
+                      <div className="mt-1 flex items-center gap-2 text-xs text-destructive">
+                        <span>Available roles could not be loaded.</span>
+                        <button type="button" className="font-medium underline underline-offset-2" onClick={() => void platformRoles.refetch()}>Retry</button>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div>
@@ -303,21 +368,54 @@ function ScoreGrid({ current, previous }: { current: ResumeScore; previous?: Res
 }
 
 function ProposalCard({ proposal, busy, onDecision }: { proposal: ResumeProposal; busy: boolean; onDecision: (decision: "approve" | "reject") => void }) {
-  const reviewable = proposal.status === "proposed" && !proposal.requiresConfirmation;
+  const reviewable = ["proposed", "approved"].includes(proposal.status) && !proposal.requiresConfirmation;
+  const statusLabel = proposal.status === "approved" ? "ready" : proposal.status;
+  const proposalValue = (value: unknown) => {
+    if (value === null || value === undefined) return "Not present";
+    if (typeof value === "string") return value;
+    if (Array.isArray(value) && value.every((item) => typeof item === "string")) return value.join(", ");
+    return JSON.stringify(value, null, 2);
+  };
+  const violationMessage = (violation: ResumeProposal["violations"][number]) => {
+    if (violation.code === "UNVERIFIED_SKILL") return `${violation.value} is not verified in your master resume.`;
+    if (violation.code === "UNVERIFIED_METRIC") return `${violation.value} is not supported by the same source bullet or your confirmation.`;
+    if (violation.code === "PROTECTED_FACT_CHANGED") return `${violation.value} is a protected fact and cannot be changed automatically.`;
+    return `${violation.code.replaceAll("_", " ").toLowerCase()}: ${violation.value}`;
+  };
   return (
     <div className="rounded-xl border border-border bg-muted/20 p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
           <Badge variant="outline" className="mb-2 capitalize">{proposal.type.replaceAll("_", " ")}</Badge>
-          <p className="text-sm font-medium">{proposal.rationale}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Why this change was suggested</p>
+          <p className="mt-1 text-sm font-medium">{proposal.rationale}</p>
           <p className="mt-1 text-xs text-muted-foreground">Section: {proposal.targetPath}</p>
         </div>
-        <Badge variant={proposal.status === "blocked" ? "destructive" : "secondary"} className="capitalize">{proposal.status}</Badge>
+        <Badge variant={proposal.status === "blocked" ? "destructive" : "secondary"} className="capitalize">{statusLabel}</Badge>
       </div>
-      {proposal.violations.length > 0 && <p className="mt-3 text-xs text-destructive">{proposal.violations.join(" ")}</p>}
+      <div className="mt-3 grid gap-3 text-xs">
+        <div className="rounded-lg border border-border bg-background/60 p-3">
+          <p className="mb-1 font-semibold text-muted-foreground">Current</p>
+          <p className="whitespace-pre-wrap break-words">{proposalValue(proposal.before)}</p>
+        </div>
+        <div className="rounded-lg border border-border bg-background/60 p-3">
+          <p className="mb-1 font-semibold text-muted-foreground">Proposed</p>
+          <p className="whitespace-pre-wrap break-words">{proposalValue(proposal.after)}</p>
+        </div>
+      </div>
+      {proposal.violations.length > 0 && (
+        <div className="mt-3 rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+          <p className="text-xs font-semibold text-destructive">Why this change was blocked</p>
+          <ul className="mt-1 list-disc space-y-1 pl-4 text-xs text-destructive">
+            {proposal.violations.map((violation) => (
+              <li key={`${violation.code}-${violation.value}`}>{violationMessage(violation)}</li>
+            ))}
+          </ul>
+        </div>
+      )}
       {reviewable && (
         <div className="mt-4 flex gap-2">
-          <Button size="sm" onClick={() => onDecision("approve")} disabled={busy} className="gap-1"><Check className="h-3.5 w-3.5" /> Apply</Button>
+          <Button size="sm" onClick={() => onDecision("approve")} disabled={busy} className="gap-1"><Check className="h-3.5 w-3.5" /> Apply · 1 credit</Button>
           <Button size="sm" variant="outline" onClick={() => onDecision("reject")} disabled={busy} className="gap-1"><X className="h-3.5 w-3.5" /> Reject</Button>
         </div>
       )}
@@ -399,6 +497,7 @@ function SkillConfirmationDialog({ skill, runId, onClose }: { skill: string | nu
             <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
             <Button type="submit" disabled={confirmSkill.isPending}>{confirmSkill.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Confirm truthfully</Button>
           </div>
+          <p className="text-xs text-muted-foreground">A confirmed skill creates a separate live resume version and charges 1 credit only when the change is applied.</p>
         </form>
       </DialogContent>
     </Dialog>
@@ -467,6 +566,33 @@ function ProcessingState({ run }: { run?: ResumeAgentRun }) {
   );
 }
 
+function PollingTimeoutState({
+  run,
+  checking,
+  onCheck,
+}: {
+  run?: ResumeAgentRun;
+  checking: boolean;
+  onCheck: () => void;
+}) {
+  return (
+    <div className="mx-auto flex min-h-[68vh] max-w-xl flex-col items-center justify-center px-6 text-center">
+      <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-500/10">
+        <AlertCircle className="h-8 w-8 text-amber-400" />
+      </div>
+      <h2 className="mt-6 text-xl font-semibold">This is taking longer than expected</h2>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Automatic status checks have stopped to avoid polling forever. The background worker may still finish this run, so check the same run again instead of submitting a duplicate request.
+      </p>
+      <p className="mt-3 text-xs text-muted-foreground capitalize">Last known status: {run?.status || "unavailable"}</p>
+      <Button type="button" onClick={onCheck} disabled={checking} className="mt-6 gap-2">
+        {checking ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+        Check current status
+      </Button>
+    </div>
+  );
+}
+
 function WorkspaceScreen({ runId, onNew }: { runId: string; onNew: () => void }) {
   const runQuery = useResumeAgentRun(runId);
   const run = runQuery.data;
@@ -483,10 +609,14 @@ function WorkspaceScreen({ runId, onNew }: { runId: string; onNew: () => void })
   }, [refetchProfile, runStatus]);
 
   const currentScore = run?.outputVersionId ? (run.scoreAfter || run.scoreBefore) : (run?.scoreBefore || run?.scoreAfter);
+  const creditsCharged = Number(run?.result?.creditsCharged ?? (run?.target?.type === "platform_market" ? 2 : 3));
   const missingSkills = useMemo(() => [
     ...(currentScore?.targetMatch.missingRequiredSkills || []),
     ...(currentScore?.targetMatch.missingPreferredSkills || []),
   ].filter((skill, index, all) => all.indexOf(skill) === index), [currentScore]);
+  const skillDemand = useMemo(() => new Map(
+    (run?.target?.requirements.market?.rankedSkills || []).map((skill) => [skill.name.toLowerCase(), skill.demandPercent]),
+  ), [run?.target?.requirements.market?.rankedSkills]);
 
   const decide = async (proposalId: string, decision: "approve" | "reject") => {
     try {
@@ -512,6 +642,10 @@ function WorkspaceScreen({ runId, onNew }: { runId: string; onNew: () => void })
       toast.error(errorMessage(error));
     }
   };
+
+  if (runQuery.pollingTimedOut && (!run || ACTIVE_STATUSES.has(run.status))) {
+    return <PollingTimeoutState run={run} checking={runQuery.isFetching} onCheck={() => void runQuery.refetch()} />;
+  }
 
   if (runQuery.isLoading || (run && ACTIVE_STATUSES.has(run.status))) return <ProcessingState run={run} />;
 
@@ -556,33 +690,38 @@ function WorkspaceScreen({ runId, onNew }: { runId: string; onNew: () => void })
         <Alert className="mb-5 border-primary/20 bg-primary/5">
           <CheckCircle2 className="h-4 w-4 text-primary" />
           <AlertTitle>New resume version created</AlertTitle>
-          <AlertDescription>This generated version is separate from your master resume. Only this version is used for downloads and further agent edits.</AlertDescription>
+          <AlertDescription>
+            This generated version is separate from your master resume. {creditsCharged} credit{creditsCharged === 1 ? " was" : "s were"} charged atomically when the version was saved.
+          </AlertDescription>
+        </Alert>
+      )}
+      {run.status === "awaiting_confirmation" && !run.outputVersionId && (
+        <Alert className="mb-5 border-amber-500/30 bg-amber-500/5">
+          <AlertCircle className="h-4 w-4 text-amber-400" />
+          <AlertTitle>No generated version was created</AlertTitle>
+          <AlertDescription>
+            The agent blocked unsupported changes. The preview and downloads below are still your master resume; review each blocked reason before confirming any missing evidence.
+          </AlertDescription>
         </Alert>
       )}
 
       {currentScore && <ScoreGrid current={currentScore} previous={run.scoreAfter ? run.scoreBefore : null} />}
 
-      <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
-        <div className="space-y-5">
+      <div className="mt-5 grid items-start gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(380px,0.75fr)]">
+        <div className="min-w-0 space-y-5">
           {version.isLoading ? (
             <div className="flex min-h-[500px] items-center justify-center rounded-2xl border border-border"><Loader2 className="h-7 w-7 animate-spin text-primary" /></div>
           ) : version.data ? (
-            <ResumeAgentPreview snapshot={version.data.snapshotJson} versionNumber={version.data.versionNumber} />
+            <div key={version.data.id} className="animate-in fade-in duration-300">
+              <ResumeAgentPreview snapshot={version.data.snapshotJson} versionNumber={version.data.versionNumber} generated={Boolean(run.outputVersionId)} />
+            </div>
           ) : null}
-
-          {(run.proposals?.length || 0) > 0 && (
-            <Card>
-              <CardHeader><CardTitle className="text-base">Agent change proposals</CardTitle><CardDescription>Review chat-requested changes. Evidence-blocked proposals cannot be applied directly.</CardDescription></CardHeader>
-              <CardContent className="space-y-3">
-                {run.proposals?.map((proposal) => <ProposalCard key={proposal.id} proposal={proposal} busy={proposalDecision.isPending} onDecision={(decision) => decide(proposal.id, decision)} />)}
-              </CardContent>
-            </Card>
-          )}
         </div>
 
-        <aside className="space-y-5">
+        <aside className="space-y-5 xl:sticky xl:top-5">
+          <ResumeAgentChat runId={runId} />
           <Card>
-            <CardHeader className="pb-3"><CardTitle className="flex items-center gap-2 text-base"><Target className="h-4 w-4 text-primary" /> Target skill analysis</CardTitle><CardDescription>Click a missing skill only if you can provide truthful evidence.</CardDescription></CardHeader>
+            <CardHeader className="pb-3"><CardTitle className="flex items-center gap-2 text-base"><Sparkles className="h-4 w-4 text-primary" /> Suggested skills</CardTitle><CardDescription>These appear in the target role but are not verified in your master resume. Select only skills you genuinely have; after confirmation, the live preview updates to a new version.</CardDescription></CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Matched</p>
@@ -591,10 +730,20 @@ function WorkspaceScreen({ runId, onNew }: { runId: string; onNew: () => void })
                 </div>
               </div>
               <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Missing—confirm before adding</p>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Available to verify</p>
                 <div className="flex flex-wrap gap-2">
                   {missingSkills.length ? missingSkills.map((skill) => (
-                    <button key={skill} onClick={() => setSelectedSkill(skill)} className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-300 transition-colors hover:bg-amber-500/20">+ {skill}</button>
+                    <button
+                      key={skill}
+                      type="button"
+                      onClick={() => setSelectedSkill(skill)}
+                      className="group inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                    >
+                      <span className="text-[9px] font-bold uppercase tracking-[0.16em] opacity-70">Role</span>
+                      <span>{skill}</span>
+                      {skillDemand.get(skill.toLowerCase()) !== undefined && <span className="opacity-70">{skillDemand.get(skill.toLowerCase())}%</span>}
+                      <span className="text-sm leading-none group-hover:text-primary-foreground">+</span>
+                    </button>
                   )) : <span className="text-xs text-muted-foreground">No missing target skills were detected.</span>}
                 </div>
               </div>
@@ -605,7 +754,14 @@ function WorkspaceScreen({ runId, onNew }: { runId: string; onNew: () => void })
               )}
             </CardContent>
           </Card>
-          <ResumeAgentChat runId={runId} />
+          {(run.proposals?.length || 0) > 0 && (
+            <Card>
+              <CardHeader><CardTitle className="text-base">Agent change proposals</CardTitle><CardDescription>Every suggestion includes its reason and evidence check. Blocked proposals were not added to the resume.</CardDescription></CardHeader>
+              <CardContent className="space-y-3">
+                {run.proposals?.map((proposal) => <ProposalCard key={proposal.id} proposal={proposal} busy={proposalDecision.isPending} onDecision={(decision) => decide(proposal.id, decision)} />)}
+              </CardContent>
+            </Card>
+          )}
         </aside>
       </div>
 

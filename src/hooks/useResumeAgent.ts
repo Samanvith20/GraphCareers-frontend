@@ -1,9 +1,12 @@
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiGet, apiPost } from "@/lib/api";
+import { resumeAgentPollingTimeRemaining } from "@/lib/resumeAgentPolling";
 import type {
   ManualTargetInput,
   MissingSkillInput,
   PlatformTargetInput,
+  PlatformRolesResponse,
   ResumeAgentMessage,
   ResumeAgentRun,
   ResumeAgentTarget,
@@ -13,6 +16,10 @@ import type {
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 const TERMINAL_STATUSES = new Set(["completed", "no_improvement", "failed", "cancelled", "awaiting_confirmation"]);
+const configuredPollingTimeout = Number(import.meta.env.VITE_RESUME_AGENT_POLL_TIMEOUT_MS);
+export const RESUME_AGENT_POLL_TIMEOUT_MS = Number.isFinite(configuredPollingTimeout) && configuredPollingTimeout > 0
+  ? configuredPollingTimeout
+  : 120_000;
 
 interface TargetResponse {
   success: boolean;
@@ -53,6 +60,19 @@ export function useResumeAgentWorkspace(enabled = true) {
   });
 }
 
+export function usePlatformRoles(platform: string) {
+  return useQuery({
+    queryKey: ["resume-agent", "platform-roles", platform],
+    queryFn: ({ signal }) => apiGet<PlatformRolesResponse>(
+      `/resume-agent/platforms/${encodeURIComponent(platform)}/roles?limit=200`,
+      { signal, timeoutMs: 15_000 },
+    ),
+    enabled: Boolean(platform),
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+  });
+}
+
 export function useStartResumeAgent() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -74,15 +94,42 @@ export function useStartResumeAgent() {
 }
 
 export function useResumeAgentRun(runId: string | null) {
-  return useQuery({
+  const [pollingTimedOut, setPollingTimedOut] = useState(false);
+  const [pollingStartedAt, setPollingStartedAt] = useState(() => Date.now());
+  const query = useQuery({
     queryKey: ["resume-agent", "run", runId],
-    queryFn: () => apiGet<RunResponse>(`/resume-agent/runs/${runId}`).then((response) => response.run),
+    queryFn: ({ signal }) => apiGet<RunResponse>(`/resume-agent/runs/${runId}`, { signal, timeoutMs: 15_000 }).then((response) => response.run),
     enabled: Boolean(runId),
     refetchInterval: (query) => {
       const status = query.state.data?.status;
-      return status && TERMINAL_STATUSES.has(status) ? false : 2000;
+      return pollingTimedOut || (status && TERMINAL_STATUSES.has(status)) ? false : 2000;
     },
   });
+
+  useEffect(() => {
+    setPollingTimedOut(false);
+    setPollingStartedAt(Date.now());
+  }, [runId]);
+
+  useEffect(() => {
+    if (!runId || pollingTimedOut) return;
+    const status = query.data?.status;
+    if (status && TERMINAL_STATUSES.has(status)) return;
+    const remaining = resumeAgentPollingTimeRemaining({
+      createdAt: query.data?.createdAt,
+      fallbackStartedAt: pollingStartedAt,
+      now: Date.now(),
+      timeoutMs: RESUME_AGENT_POLL_TIMEOUT_MS,
+    });
+    if (remaining <= 0) {
+      setPollingTimedOut(true);
+      return;
+    }
+    const timeout = window.setTimeout(() => setPollingTimedOut(true), remaining);
+    return () => window.clearTimeout(timeout);
+  }, [pollingStartedAt, pollingTimedOut, query.data?.createdAt, query.data?.status, runId]);
+
+  return { ...query, pollingTimedOut, pollingTimeoutMs: RESUME_AGENT_POLL_TIMEOUT_MS };
 }
 
 export function useResumeAgentVersion(versionId: string | null) {

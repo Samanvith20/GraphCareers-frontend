@@ -19,20 +19,28 @@ function SectionTitle({ children }: { children: string }) {
   );
 }
 
-export function ResumeAgentPreview({ snapshot, versionNumber }: { snapshot: ResumeSnapshot; versionNumber: number }) {
+export function ResumeAgentPreview({
+  snapshot,
+  versionNumber,
+  generated = true,
+}: {
+  snapshot: ResumeSnapshot;
+  versionNumber: number;
+  generated?: boolean;
+}) {
   const skills = snapshot.skills;
   return (
     <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-muted/30 px-5 py-3">
         <div className="flex items-center gap-2 text-sm font-semibold">
-          <FileText className="h-4 w-4 text-primary" /> Generated resume preview
+          <FileText className="h-4 w-4 text-primary" /> {generated ? "Generated resume preview" : "Master resume preview"}
         </div>
         <div className="flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[11px] font-medium text-primary">
-          <LockKeyhole className="h-3 w-3" /> Version {versionNumber} · master protected
+          <LockKeyhole className="h-3 w-3" /> Version {versionNumber} · {generated ? "master protected" : "no agent changes applied"}
         </div>
       </div>
 
-      <div className="max-h-[820px] overflow-y-auto bg-slate-100 p-3 sm:p-6">
+      <div className="max-h-[1050px] overflow-y-auto bg-slate-100 p-3 sm:p-6">
         <article className="mx-auto min-h-[900px] max-w-[760px] bg-white px-8 py-10 text-[11px] leading-relaxed text-slate-800 shadow-xl sm:px-12">
           <header className="border-b border-slate-300 pb-4 text-center">
             <h1 className="text-2xl font-bold tracking-tight text-slate-950">{snapshot.contact?.name || "Candidate"}</h1>

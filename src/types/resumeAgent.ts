@@ -78,7 +78,10 @@ export interface ResumeProposal {
   rationale: string;
   requiresConfirmation: boolean;
   status: "proposed" | "approved" | "rejected" | "applied" | "blocked";
-  violations: string[];
+  violations: Array<{
+    code: "UNVERIFIED_SKILL" | "UNVERIFIED_METRIC" | "PROTECTED_FACT_CHANGED" | string;
+    value: string;
+  }>;
 }
 
 export interface ResumeAgentRun {
@@ -193,6 +196,18 @@ export interface ResumeWorkspaceResponse {
     totalOptimizations: number;
   };
   versions: Array<Pick<ResumeVersion, "id" | "versionNumber" | "source" | "parentVersionId" | "changeSummary" | "createdAt">>;
+}
+
+export interface PlatformRoleOption {
+  name: string;
+  jobCount: number;
+}
+
+export interface PlatformRolesResponse {
+  success: boolean;
+  platform: string;
+  maximumAgeDays: number;
+  roles: PlatformRoleOption[];
 }
 
 export interface PlatformTargetInput {
