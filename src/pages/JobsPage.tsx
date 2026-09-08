@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, forwardRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 import {
   MapPin,
   Briefcase,
@@ -35,19 +35,20 @@ import { Link } from "react-router-dom";
 import { useRequestReferrals } from "@/hooks/useReferrals";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { JobPreferencesPanel } from "@/components/jobs/JobPreferencesPanel";
 
 // ─── Date filter options ──────────────────────────────────────────────────────
 
 const DATE_OPTIONS: { label: string; value: JobDaysFilter }[] = [
-  { label: "Today",      value: 1 },
-  { label: "Yesterday",  value: 2 },
-  { label: "3 days ago", value: 3 },
+  { label: "Last 24 hours", value: 1 },
+  { label: "Last 48 hours", value: 2 },
+  { label: "Last 72 hours", value: 3 },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const getExperienceText = (minExp: number | null, maxExp: number | null) => {
-  if (minExp == null && maxExp == null) return "Any exp.";
+  if (minExp == null && maxExp == null) return "Experience not provided";
   if (minExp == null) return `Up to ${maxExp} yrs`;
   if (maxExp == null) return `${minExp}+ yrs`;
   if (minExp === 0 && maxExp === 0) return "Fresher";
@@ -170,7 +171,7 @@ const MatchCircle = ({ pct }: { pct: number }) => {
           </span>
         </div>
       </div>
-      <span className={cn("text-[10px] font-semibold", text)}>{label}</span>
+      <span className={cn("text-[10px] font-semibold", text)}>Skill coverage</span>
     </div>
   );
 };
@@ -240,7 +241,8 @@ interface Job {
   company: string;
   location: string;
   url: string;
-  matchPercent: number;
+  matchPercent: number | null;
+  requiredSkills?: string[];
   matchedSkills: string[];
   missingSkills: string[];
   matchedCount: number;
@@ -263,7 +265,7 @@ interface JobCardProps {
   onReferralClick: () => void;
 }
 
-const cardVariants = {
+const cardVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: (i: number) => ({
     opacity: 1,
@@ -340,7 +342,7 @@ const JobCard = forwardRef<HTMLDivElement, JobCardProps>(
             </div>
 
             <div className="flex flex-col items-end gap-1.5 shrink-0">
-              <MatchCircle pct={job.matchPercent} />
+              {job.matchPercent != null ? <MatchCircle pct={job.matchPercent} /> : <span className="text-xs text-muted-foreground">Fit not assessed</span>}
               <span className="flex items-center gap-1 text-[10px] sm:text-[11px] font-medium text-[#6b7280]">
                 <Clock className="h-3 w-3" />
                 {job.timeText}
@@ -350,9 +352,10 @@ const JobCard = forwardRef<HTMLDivElement, JobCardProps>(
 
           <div className="mt-1 bg-[r] sm:mt-1">
             <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#4b5563]">
-              Skills · {job.matchedCount}/{job.totalRequired} matched
+              {job.matchPercent != null ? `Skills · ${job.matchedCount}/${job.totalRequired} matched` : "Listed skills · add your skills to compare"}
             </span>
             <div className="flex flex-wrap gap-1.5">
+              {job.matchPercent == null && job.requiredSkills?.slice(0, 8).map(skill => <SkillChip key={skill} skill={skill} variant="extra" />)}
               {job.matchedSkills.slice(0, 5).map((s) => (
                 <SkillChip key={s} skill={s} variant="matched" />
               ))}
@@ -407,10 +410,14 @@ const PageHeader = ({
   total,
   days,
   onDaysChange,
+  title,
+  description,
 }: {
   total: number;
   days: JobDaysFilter;
   onDaysChange: (d: JobDaysFilter) => void;
+  title: string;
+  description: string;
 }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -419,9 +426,9 @@ const PageHeader = ({
     className="flex items-start justify-between gap-4 flex-wrap"
   >
     <div>
-      <h1 className="text-[28px] font-bold text-white tracking-tight">Jobs For You</h1>
+      <h1 className="text-[28px] font-bold text-white tracking-tight">{title}</h1>
       <p className="text-[14px] text-[#6b7280] mt-0.5">
-        AI-curated opportunities matched to your profile
+        {description}
       </p>
     </div>
 
@@ -478,13 +485,16 @@ const JobsPage = () => {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
+    isFetchNextPageError,
+    refetch,
+    isFetching,
   } = useMatchedJobs(days);
 
   const observerTarget = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage && !isFetchNextPageError) {
           fetchNextPage();
         }
       },
@@ -492,7 +502,7 @@ const JobsPage = () => {
     );
     if (observerTarget.current) observer.observe(observerTarget.current);
     return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage]);
 
   if (isLoading) {
     return (
@@ -515,7 +525,7 @@ const JobsPage = () => {
     );
   }
 
-  if (isError)
+  if (isError && !data)
     return (
       <AppLayout>
         <ErrorPage />
@@ -527,17 +537,20 @@ const JobsPage = () => {
   const filtered = jobs;
 
   const filters = data?.pages[0]?.filters;
+  const feed = data?.pages[0]?.feed;
 
   return (
     <AppLayout>
       <div className="max-w-[1100px] mx-auto px-6 py-8 space-y-7">
-        <PageHeader total={total} days={days} onDaysChange={setDays} />
+        <PageHeader total={total} days={days} onDaysChange={setDays} title={feed?.title || "Job listings"} description={feed?.description || "Browse recent opportunities"} />
+        <JobPreferencesPanel feed={feed} />
 
         <div className="flex items-center justify-between">
           <p className="text-[13px] text-[#6b7280]">
             Showing <span className="text-white font-semibold">{filtered.length}</span> of{" "}
             <span className="text-white font-semibold">{total}</span> jobs
           </p>
+          <Button variant="outline" size="sm" disabled={isFetching} onClick={() => refetch()}>{isFetching ? "Refreshing…" : "Refresh jobs"}</Button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 xl:gap-6">
@@ -560,6 +573,7 @@ const JobsPage = () => {
         </div>
 
         {/* Infinite scroll sentinel */}
+        {isFetchNextPageError && <div role="alert" className="text-sm text-muted-foreground">Could not load more jobs. Your current results are still available. <Button variant="outline" onClick={() => fetchNextPage()}>Retry loading more</Button></div>}
         {hasNextPage && <div ref={observerTarget} className="h-8 w-full" />}
 
         {/* End of results */}
@@ -571,7 +585,7 @@ const JobsPage = () => {
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06] text-[13px] text-[#6b7280]">
               <CheckCircle className="h-4 w-4 text-[#00D084]" />
-              You've seen all {total} matched jobs
+              You've seen all {total} jobs in this feed
             </div>
           </motion.div>
         )}

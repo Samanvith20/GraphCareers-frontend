@@ -23,6 +23,7 @@ export const useUploadResume = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
+      queryClient.invalidateQueries({ queryKey: ["match-jobs"] });
     },
   });
 };

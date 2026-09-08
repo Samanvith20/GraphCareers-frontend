@@ -1,4 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -11,9 +13,10 @@ export type JobDaysFilter = 1 | 2 | 3;
 interface FetchParams {
   pageParam?: number;
   days: JobDaysFilter;
+  signal?: AbortSignal;
 }
 
-async function fetchMatchedJobs({ pageParam = 1, days }: FetchParams) {
+async function fetchMatchedJobs({ pageParam = 1, days, signal }: FetchParams) {
   const url = new URL(`${BASE_URL}/api/jobs`);
   url.searchParams.set("page",  String(pageParam));
   url.searchParams.set("limit", "20");
@@ -22,14 +25,10 @@ async function fetchMatchedJobs({ pageParam = 1, days }: FetchParams) {
   const res = await fetch(url.toString(), {
     method: "GET",
     credentials: "include",
+    signal,
   });
 
   const data = await res.json();
-
-  // Profile incomplete — return empty gracefully, don't crash
-  if (res.status === 400) {
-    return { jobs: [], error: data.error };
-  }
 
   if (!res.ok) {
     throw new Error(data.error || "Failed to fetch jobs");
@@ -39,11 +38,14 @@ async function fetchMatchedJobs({ pageParam = 1, days }: FetchParams) {
 }
 
 export function useMatchedJobs(days: JobDaysFilter = 3) {
+  const { data: auth } = useAuth();
+  const { data: profile } = useProfile();
   return useInfiniteQuery({
     // days is part of the key → different day range = separate cache entry → auto-refetch
-    queryKey: ["match-jobs", days],
-    queryFn: ({ pageParam }) =>
-      fetchMatchedJobs({ pageParam: pageParam as number | undefined, days }),
+    queryKey: ["match-jobs", auth?.user?.id, days, profile?.skills, profile?.experience, profile?.resume?.status],
+    enabled: Boolean(auth?.user?.id),
+    queryFn: ({ pageParam, signal }) =>
+      fetchMatchedJobs({ pageParam: pageParam as number | undefined, days, signal }),
     initialPageParam: 1,
     getNextPageParam: (lastPage, allPages) => {
       const totalLoaded    = allPages.flatMap((p) => p.jobs).length;
@@ -51,9 +53,9 @@ export function useMatchedJobs(days: JobDaysFilter = 3) {
       return totalLoaded < totalAvailable ? allPages.length + 1 : undefined;
     },
 
-    // Each days-filter result is cached independently for 24 h
-    staleTime: 24 * 60 * 60 * 1000,
-    gcTime:    48 * 60 * 60 * 1000,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
+    refetchOnWindowFocus: true,
 
     retry: 2,
   });

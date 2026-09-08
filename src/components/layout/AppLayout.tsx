@@ -27,6 +27,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { logoutUser } from "@/lib/logout";
 import { useGetReferrals } from "@/hooks/useReferrals";
+import { useQueryClient } from "@tanstack/react-query";
 
 // ─── Nav structure ────────────────────────────────────────────────────────────
 
@@ -274,6 +275,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const { pathname }  = useLocation();
   const navigate      = useNavigate();
   const { data: auth, isLoading: authLoading } = useAuth();
+  const queryClient = useQueryClient();
   const { data: profile } = useProfile();
   const { data: dashboardData } = useGetReferrals();
 
@@ -319,6 +321,8 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const handleLogout = async () => {
     try {
       await logoutUser();
+      await queryClient.cancelQueries();
+      queryClient.clear();
       navigate("/login");
     } catch {
       toast.error("Failed to logout. Try again.");

@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -27,9 +28,10 @@ async function fetchProfile() {
 }
 
 export function useProfile(polling=false) {
-  
+  const { data: auth } = useAuth();
   return useQuery({
-    queryKey: ["profile"],
+    queryKey: ["profile", auth?.user?.id],
+    enabled: Boolean(auth?.user?.id),
     queryFn: fetchProfile,
 
     // ✅ caching strategy
